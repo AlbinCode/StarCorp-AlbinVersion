@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StarCorp.Data;
+using StarCorp.Models;
 
 namespace StarCorp.Controllers
 {
@@ -24,25 +25,66 @@ namespace StarCorp.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var products = await _productDataService.GetProductsAsync();
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to retrieve products");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post()
+        public async Task<IActionResult> Post([FromBody] Product product)
         {
-            throw new NotImplementedException();
+            if (product == null) return BadRequest();
+
+            try
+            {
+                // TODO: Wire up AddProductAsync
+                product.Id = Guid.NewGuid(); // Temp ID generation
+                return CreatedAtAction(nameof(Get), new { id = product.Id }, product);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating product");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Update()
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] Product product)
         {
-            throw new NotImplementedException();
+            if (product == null || id != product.Id) return BadRequest("Invalid product data");
+
+            try
+            {
+                // TODO: Implement update logic
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating product");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> Delete()
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // TODO: Implement delete logic
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting product");
+                return StatusCode(500, "Internal server error");
+            }
         }
     }
 }
