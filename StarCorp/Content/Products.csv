@@ -1,0 +1,68 @@
+Id,Name,Description,Brand,Category,Price,Stock
+1c7d6b21-fc61-4851-b19f-10a2f9255d1c,iPhone 12,5G smartphone with A14 Bionic chip,Apple,Electronics,799,50
+f3e30f03-463c-4b31-bf2f-19a3f5e8c509,Galaxy S21,Ultra 5G smartphone with 108MP camera,Samsung,Electronics,1199,25
+a42c90b4-c6a6-4b5d-9fc4-6348ec8a8dd1,MacBook Air,Lightweight laptop with M1 chip and Retina display,Apple,Computers,999,15
+2b1bbd5f-96f8-4f31-9b3d-6b6c2ca4eb74,Pavilion,"15.6"" laptop with AMD Ryzen 5 processor",HP,Computers,649,30
+7b1b1b3e-3be1-4b2f-95b8-dcc6d75a3f6e,Inspiron,"14"" 2-in-1 laptop with Intel Core i5 processor",Dell,Computers,799,20
+31c765b2-cf16-49e7-9438-d3175c8b5f0a,iPad Pro,"11"" tablet with Liquid Retina display and M1 chip",Apple,Electronics,1099,10
+0e555c94-8f1a-42e8-b2b8-f0a7d78e1f48,Surface Pro 7,"12.3"" tablet with Intel Core i5 processor and touchscreen",Microsoft,Electronics,899,15
+c27f0e32-b1a7-4b93-bd62-0b91e9d8d711,Echo,Smart speaker with Alexa,Amazon,Electronics,99,100
+b1ef9f05-7f78-456c-89a7-9b8d91460f14,Nest,Smart speaker and home assistant with Google Assistant,Google,Electronics,99,75
+02e72d45-ba7d-4524-9422-1f17dcdf7e57,Versa,Smartwatch with heart rate monitor and GPS,Fitbit,Electronics,199,35
+0b2cda74-8654-4dd2-8b5b-7a1f4686b7d6,Watch SE,Smartwatch with Retina display and fitness tracking,Apple,Electronics,279,20
+9aa9a0d4-e6d6-4dfe-9d50-2f9b7fcaaf15,Galaxy Watch,Smartwatch with AMOLED display and fitness tracking,Samsung,Electronics,329,15
+f5859c3f-1315-460b-9158-6cf77b02198f,WH-1000XM4,Wireless noise-cancelling headphones with Alexa and Google Assistant,Sony,Electronics,349,10
+ab9f7c04-9f5f-4c1b-bb19-32c9ba5ec50b,QuietComfort 35 II,Wireless noise-cancelling headphones with Alexa and Google Assistant,Bose,Electronics,299,15
+cb3f47e4-5f14-4b21-8722-1c6c511dd942,Air Max 270,Stylish and comfortable running shoes,Nike,Sporting Goods,150,20
+74d4cfa5-9f20-4b7b-aa7a-4c2c30d39e9b,Ultraboost,High-performance running shoes with responsive cushioning,Adidas,Sporting Goods,180,15
+0b4e7e8c-8aa8-41a4-8e80-b2b24f2b40d2,HeatGear,Moisture-wicking t-shirt for athletic performance,Under Armour,Sporting Goods,30,50
+01f1e2d2-7214-41e1-aac8-bae2a196bbcd,Denali,Fleece jacket for outdoor adventures,North Face ,Clothing,179,10
+a13aef7a-75d1-41b1-bf74-2e58d3f13e36,Better Sweater,Cozy knit pullover sweater for cool weather,Patagonia,Clothing,139,15
+8232692b-357d-4c70-bd72-bf1e5229ba75,501 Jeans,Classic straight-leg jeans for everyday wear,Levi's,Clothing,59,25
+a951a77f-1055-4d3a-9d1c-965a2606f121,Top Handle Bag,Leather handbag with detachable strap,Coach Parker,Accessories,395,5
+dc4f9494-df3a-4a5c-bf11-8c2a46d6ca1f,Jet Set Tote,Spacious tote bag with gold-tone hardware,Michael Kors,Accessories,298,10
+e7ce846f-b2c9-4740-8816-6345bb867e2d,Ray-Ban Wayfarer Sunglasses,Iconic sunglasses with polarized lenses,Ray-Ban,Accessories,154,20
+b2b92120-cf0d-424a-a670-5edab78f29d9,Tumi Alpha 3 Garment Bag,Durable garment bag for business travel,Tumi,Accessories,695,5
+e66c9f92-92ed-46ff-a2be-9b7af944d6e1,Sony PlayStation 5,Next-generation gaming console with 4K graphics,Sony,Electronics,499.99,10
+b9a8e733-b245-4a21-b192-8e7aeb146db4,Xbox Series X,Powerful gaming console with backward compatibility,Microsoft,Electronics,499.99,15
+43e830b5-7a1f-4f5d-94c4-7c07af49a456,Nintendo Switch,Hybrid gaming console for home and portable play,Nintendo,Electronics,299.99,20
+e0f277a9-c0ff-4e6e-b27a-bd711d9e56b3,"LG 65"" OLED TV",4K OLED TV with AI ThinQ and Dolby Vision,LG,Electronics,1999.99,5
+aa4807a9-82a1-429d-952b-04e1b36d7d81,Bose QuietComfort Earbuds,True wireless noise-cancelling earbuds with sweat resistance,Bose,Electronics,279.99,20
+bb6f77fe-13d3-43ea-853d-bbf5d0982a3a,Samsung Galaxy Tab S7,"11"" tablet with Snapdragon processor and S Pen support",Samsung,Electronics,649.99,10
+881a01ae-9e3e-4c32-9545-81fc9a60b5b3,Fitbit Charge 4,Fitness tracker with built-in GPS and heart rate monitor,Fitbit,Electronics,149.99,30
+e8df8406-7a7f-4fc5-80c3-ae24e6787b47,DJI Mavic Air 2,Foldable drone with 4K camera and intelligent tracking,DJI,Electronics,799.99,5
+9d12e2f1-2b7f-4a6c-b38a-9c8972b9c56a,Canon EOS R6,Mirrorless camera with 20.1MP full-frame CMOS sensor,Canon,Electronics,2499.99,8
+72ae48b2-9c59-44b4-8fa1-22e0c94e603d,Apple AirPods Pro,Wireless earbuds with active noise cancellation and transparency mode,Apple,Electronics,249.99,20
+df9902ac-51f0-4ae1-9a61-86b9f63b4b90,Nike Air Max 270,Stylish and comfortable running shoes,Nike,Clothing,150,20
+d1e2f3a4-b5c6-789a-1b2c-3d4e5f6a7b8c,Patagonia Better Sweater,Cozy knit pullover sweater for cool weather,Patagonia,Clothing,139,15
+b0a1c2e3-f4d5-6789-0b1c-2e3f4d5a6b7c,Cuisinart Stainless Steel Cookware Set,High-quality stainless steel cookware set,Cuisinart,Kitchenware,199.99,10
+f9e8d7c6-b5a4-3210-9f8e-7d6c5b4a3f2e,KitchenAid Stand Mixer,Powerful stand mixer for baking and cooking,KitchenAid,Kitchenware,299.99,8
+1b029a4e-8421-4c10-8b2e-45ab0e5e2f0d,Professional Cookware Set,10-Piece Non-Stick Pots and Pans,XYZ Kitchen, Kitchenware,149.99,50
+2c7a1b23-6b41-4a5a-91fc-5b6b02ef181a,Chef's Knife Set,6-Piece High-Quality Stainless Steel Knives,ABC Cutlery, Kitchenware,79.99,100
+3d9ab498-9011-416a-b4e2-965acca12b99,Stainless Steel Mixing Bowls,Set of 3 with Lids,MasterChef, Kitchenware,39.99,80
+4e5fbc2a-1533-43ff-96b4-b56f3ef39de3,Non-Stick Grill Pan,Heavy-Duty Aluminum with Grease Draining System,DEF Kitchen, Kitchenware,49.99,60
+5f8d59f2-1c9c-4ff1-9d5d-7e4c0b3e34c9,Electric Hand Mixer,5-Speed Lightweight Mixing and Whisking,HomeMaster, Kitchenware,29.99,100
+6a718f3a-ef56-4bdc-9c18-c5a5290f03c9,Stainless Steel Knife Block Set,14-Piece Sharp and Durable Knives,GourmetPro, Kitchenware,99.99,70
+7b927f64-aa0c-481c-9a6a-502d3e9a91f3,Non-Stick Baking Sheet Set,Set of 3 Heavy-Duty Carbon Steel Sheets,DeluxeBake, Kitchenware,34.99,80
+8c8b9c3f-4d8d-4221-bb97-c256c184c7dd,Silicone Spatula Set,Heat-Resistant and Non-Stick,SuperChef, Kitchenware,14.99,120
+9d30d729-3e85-4e0f-a13c-fb36b0e8a4d8,Stainless Steel Mixing Spoon Set,Set of 3 Durable and Versatile Spoons,ProCook, Kitchenware,12.99,100
+4c94657a-0510-4f3b-9f78-3f4db7427457,Makita Cordless Drill Kit,Powerful 18V Drill with Lithium-Ion Battery,Makita,Power Tools,149.99,78
+7a8753e7-930e-4d1e-9a6a-2cbcb2d29c19,DeWalt Random Orbital Sander,Variable Speed for Smooth Finishes,DeWalt,Power Tools,119.99,93
+3195c27a-f6ea-44f7-9d7b-d9a9926ed57e,Bosch Angle Grinder,Powerful 4.5-Inch Grinder with Adjustable Guard,Bosch,Power Tools,79.99,86
+e72d55e4-5d4f-47c9-bd0e-0a4e04d9a445,Milwaukee Circular Saw,Lightweight and Durable 7-1/4-Inch Saw,Milwaukee,Power Tools,229.99,65
+18374e23-93e1-4f1e-826f-2d411cf5f4fd,Ryobi Jigsaw,Orbital Action for Precise and Curved Cuts,Ryobi,Power Tools,99.99,75
+f0dbd8c0-8a7b-4cfc-bf02-d225c33db9c4,Makita Rotary Hammer Drill,Heavy-Duty SDS-Plus Hammer with Chisel Function,Makita,Power Tools,299.99,42
+b942f1b7-77b4-492f-bd5d-bb4bc25ff149,Bosch Bench Grinder,6-Inch Dual Wheel Grinder for Sharpening and Grinding,Bosch,Power Tools,89.99,58
+20f261d9-5295-478d-9934-45781e40084a,RIDGID Heat Gun,Variable Temperature Control for DIY Projects,RIDGID,Power Tools,49.99,96
+b85ff1b9-ef4a-48f9-8494-3e0b0a1fe2e9,Hitachi Reciprocating Saw,Powerful Saw for Demolition and Cutting,Hitachi,Power Tools,139.99,37
+f76a864b-ae94-46c5-9471-d41235b88c9e,Black and Decker Electric Screwdriver,Compact and Cordless with LED Light,Black and Decker,Power Tools,29.99,88
+4c94657a-0510-4f3b-9f78-3f8e27427457,Bosch Cordless Drill Kit,Powerful 20V Drill with Lithium-Ion Battery,Bosch,Power Tools,169.99,62
+7a8753e7-930e-4d1e-9a6a-2abcb2d29c19,Bosch Reciprocating Saw,Variable Speed for Cutting through Various Materials,Bosch,Power Tools,199.99,49
+3195c27a-f6ea-44f7-9d7b-d9a9926ed57d,Milwaukee Impact Driver Kit,Brushless Motor for Maximum Power and Efficiency,Milwaukee,Power Tools,159.99,78
+e72d55e4-5d4f-47c9-abcd-0a4e04d9a445,Milwaukee Hammer Drill,High-Performance Drill with Advanced Electronics,Milwaukee,Power Tools,179.99,65
+18374e23-93e1-4f1e-826f-2d411c6664fd,Bosch Angle Grinder,Powerful 7-Inch Grinder for Heavy-Duty Applications,Bosch,Power Tools,219.99,37
+f0dbd8c0-8a7b-4cfc-bf02-dff5c33db9c4,Bosch Rotary Hammer Drill,SDS-Plus Bulldog Xtreme for Concrete Drilling,Bosch,Power Tools,299.99,28
+b94a41b7-77b4-492f-bd5d-bb4bc25ff149,Milwaukee Circular Saw,Powerful 7-1/4-Inch Saw with Electric Brake,Milwaukee,Power Tools,179.99,51
+20f261d9-5265-418d-9934-45781e40084a,Bosch Multi-Tool Kit,"Versatile Tool for Cutting, Sanding, and Scraping",Bosch,Power Tools,139.99,42
+b852f1b9-ef4a-48f9-8494-3e0b0a1fe2e9,Milwaukee Impact Wrench Kit,High Torque for Heavy-Duty Fastening Applications,Milwaukee,Power Tools,249.99,36
+f76a764b-ae94-46c5-9471-d49825b88c9e,Bosch Router Kit,Variable Speed for Precise Routing,Bosch,Power Tools,199.99,29
