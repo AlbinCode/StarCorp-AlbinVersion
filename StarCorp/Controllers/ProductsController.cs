@@ -89,7 +89,7 @@ namespace StarCorp.Controllers
             }
             catch (ArgumentException)
             {
-                // Om vi försöker uppdatera en produkt som inte finns
+                // Om jag försöker uppdatera en produkt som inte finns
                 return NotFound("Kunde inte hitta produkten.");
             }
         }
@@ -97,7 +97,7 @@ namespace StarCorp.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            // Vi måste hämta listan först för att hitta hela produktobjektet
+            // Jag måste hämta listan först för att hitta hela produktobjektet
             var allProducts = await _productDataService.GetProductsAsync();
 
             // Hitta produkten som har rätt ID
