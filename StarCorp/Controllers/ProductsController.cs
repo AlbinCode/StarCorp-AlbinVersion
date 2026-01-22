@@ -1,9 +1,10 @@
-using System;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StarCorp.Data;
 using StarCorp.Models;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace StarCorp.Controllers
 {
@@ -23,68 +24,94 @@ namespace StarCorp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] string query = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
-            try
+            // Hämta alla produkter asynkront
+            var allProducts = await _productDataService.GetProductsAsync();
+
+            // Om sökord finns, filtrera listan
+            if (!string.IsNullOrEmpty(query))
             {
-                var products = await _productDataService.GetProductsAsync();
-                return Ok(products);
+                string lowerQuery = query.ToLower();
+
+                allProducts = allProducts.Where(p =>
+                    (p.Name != null && p.Name.ToLower().Contains(lowerQuery)) ||
+                    (p.Description != null && p.Description.ToLower().Contains(lowerQuery)) ||
+                    (p.Brand != null && p.Brand.ToLower().Contains(lowerQuery)) ||
+                    (p.Category != null && p.Category.ToLower().Contains(lowerQuery))
+                );
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to retrieve products");
-                return StatusCode(500, "Internal server error");
-            }
+
+           
+            var result = allProducts
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return Ok(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Product product)
         {
-            if (product == null) return BadRequest();
+            // Om produkten saknar ID, skapa ett nytt
+            if (product.Id == Guid.Empty)
+            {
+                product.Id = Guid.NewGuid();
+            }
 
             try
             {
-                // TODO: Wire up AddProductAsync
-                product.Id = Guid.NewGuid(); // Temp ID generation
-                return CreatedAtAction(nameof(Get), new { id = product.Id }, product);
+                // Försök spara produkten
+                await _productDataService.CreateProductAsync(product);
+                return Ok(product);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
-                _logger.LogError(ex, "Error creating product");
-                return StatusCode(500, "Internal server error");
+                // Om något gick fel, skicka tillbaka felet
+                return BadRequest(ex.Message);
             }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] Product product)
         {
-            if (product == null || id != product.Id) return BadRequest("Invalid product data");
+            // Kolla så att ID i länken stämmer med ID på produkten
+            if (id != product.Id)
+            {
+                return BadRequest("ID matchar inte.");
+            }
 
             try
             {
-                // TODO: Implement update logic
-                return NoContent();
+                await _productDataService.UpdateProductAsync(product);
+                return Ok(product);
             }
-            catch (Exception ex)
+            catch (ArgumentException)
             {
-                _logger.LogError(ex, "Error updating product");
-                return StatusCode(500, "Internal server error");
+                // Om vi försöker uppdatera en produkt som inte finns
+                return NotFound("Kunde inte hitta produkten.");
             }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            try
+            // Vi måste hämta listan först för att hitta hela produktobjektet
+            var allProducts = await _productDataService.GetProductsAsync();
+
+            // Hitta produkten som har rätt ID
+            var productToDelete = allProducts.FirstOrDefault(p => p.Id == id);
+
+            if (productToDelete == null)
             {
-                // TODO: Implement delete logic
-                return NoContent();
+                return NotFound("Produkten finns inte.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting product");
-                return StatusCode(500, "Internal server error");
-            }
+
+            // Ta bort den via servicen
+            await _productDataService.DeleteProductAsync(productToDelete);
+
+            return Ok();
         }
     }
 }
