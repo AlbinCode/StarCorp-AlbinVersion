@@ -11,5 +11,13 @@ namespace StarCorp.Models
         public string DeliveryAddress { get; set; }
         public decimal TotalValue { get; set; }
         public IEnumerable<IOrderLine> Lines { get; set; }
+
+        public bool Equals(IOrder? other)
+        {
+            if (other == null) return false;
+
+            return this.Id == other.Id;
+        }
     }
 }
+    
