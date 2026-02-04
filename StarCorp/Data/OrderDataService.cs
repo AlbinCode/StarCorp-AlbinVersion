@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using CsvHelper.Configuration;
 using StarCorp.Abstractions;
 using StarCorp.Models;
 using System;
@@ -14,6 +15,8 @@ namespace StarCorp.Data
     {
         Task<IQueryable<IOrder>> GetOrdersAsync();
         Task<Guid> SaveOrder(IOrder order);
+
+        Task<Guid> CreateOrderAsync(IOrder order);
     }
 
     /// <summary>
@@ -69,6 +72,36 @@ namespace StarCorp.Data
             return orders.AsQueryable();
         }
 
+        public async Task<Guid> CreateOrderAsync(IOrder order)
+        {
+            var fileExists = File.Exists(ORDERS_FILE_PATH) && new FileInfo(ORDERS_FILE_PATH).Length > 0;
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = !fileExists
+            };
+
+            using (var writer = new StreamWriter(ORDERS_FILE_PATH, true))
+            using (var csv = new CsvWriter(writer, config))
+            {
+                await csv.WriteRecordsAsync(new[] { order });
+            }
+
+            foreach (var line in order.Lines)
+                line.OrderId = order.Id;
+
+            var linesFileExists = File.Exists(ORDERLINES_FILE_PATH) && new FileInfo(ORDERLINES_FILE_PATH).Length > 0;
+            var linesConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = !linesFileExists
+            };
+            using (var writer = new StreamWriter(ORDERLINES_FILE_PATH, true))
+            using (var csv = new CsvWriter(writer, linesConfig))
+            {
+                await csv.WriteRecordsAsync(order.Lines);
+            }
+
+            return order.Id;
+        }
 
 
         public async Task<Guid> SaveOrder(IOrder order)
