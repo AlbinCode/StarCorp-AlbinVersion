@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StarCorp.Data;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
 
 namespace StarCorp.Controllers
 {
@@ -19,5 +23,35 @@ namespace StarCorp.Controllers
             _orderDataService = orderDataService;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Get([FromQuery] string query = null, [FromQuery] int page = 1, [FromQuery] int pagesize = 20)
+        {
+            var allOrders = await _orderDataService.GetOrdersAsync();
+
+            if (!string.IsNullOrEmpty(query))
+            {
+                string lowerQuery = query.ToLower();
+
+                var allProducts = await _productDataService.GetProductsAsync();
+
+                var matchingProductIds = allProducts
+                 .Where(p => p.Name != null && p.Name.ToLower().Contains(lowerQuery))
+                 .Select(p => p.Id)
+                 .ToList();
+
+                allOrders = allOrders.Where(o =>
+                (o.Buyer != null && o.Buyer.ToLower().Contains(lowerQuery)) ||
+                (o.Lines.Any(line => matchingProductIds.Contains(line.ProductId))));
+            }
+
+            var result = allOrders
+                .Skip((page - 1) * pagesize)
+                .Take(pagesize)
+                .ToList();
+
+            return Ok(result);
+
+
+        }
     }
 }

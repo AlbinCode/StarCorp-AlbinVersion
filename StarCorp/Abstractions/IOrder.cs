@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace StarCorp.Abstractions
 {
-    public interface IOrder
+    public interface IOrder : IEquatable<IOrder>
     {
         Guid Id { get; set; }
         string Buyer { get; set; }

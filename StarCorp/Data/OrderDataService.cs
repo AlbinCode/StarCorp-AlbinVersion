@@ -1,14 +1,18 @@
-﻿using System;
+﻿using CsvHelper;
+using StarCorp.Abstractions;
+using StarCorp.Models;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
-using CsvHelper;
-using StarCorp.Abstractions;
 
 namespace StarCorp.Data
 {
     public interface IOrderDataService
     {
+        Task<IQueryable<IOrder>> GetOrdersAsync();
         Task<Guid> SaveOrder(IOrder order);
     }
 
@@ -34,6 +38,38 @@ namespace StarCorp.Data
                 using (File.Create(ORDERLINES_FILE_PATH)) { };
             }
         }
+
+        public async Task<IQueryable<IOrder>> GetOrdersAsync()
+        {
+            var orders = new List<Order>();
+
+            using (var reader = new StreamReader(ORDERS_FILE_PATH))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            {
+                orders = csv.GetRecordsAsync<Order>().ToBlockingEnumerable().ToList();
+            }
+
+            if (File.Exists(ORDERLINES_FILE_PATH))
+            {
+                var allOrderLines = new List<OrderLine>();
+
+                using (var reader = new StreamReader(ORDERLINES_FILE_PATH))
+                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+                {
+                    allOrderLines = csv.GetRecordsAsync<OrderLine>().ToBlockingEnumerable().ToList();
+                }
+
+                foreach (var order in orders)
+                {
+                    var myLines = allOrderLines.Where(line => line.OrderId == order.Id).ToList();
+
+                    order.Lines = myLines;
+                }
+            }
+            return orders.AsQueryable();
+        }
+
+
 
         public async Task<Guid> SaveOrder(IOrder order)
         {
