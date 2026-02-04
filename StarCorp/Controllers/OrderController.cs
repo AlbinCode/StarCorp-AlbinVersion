@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StarCorp.Data;
+using StarCorp.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -52,6 +53,29 @@ namespace StarCorp.Controllers
             return Ok(result);
 
 
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] Order order)
+        {
+            if (order == null)
+            {
+                return BadRequest("Ordern saknas.");
+            }
+
+            if (order.Lines == null || !order.Lines.Any())
+            {
+                return BadRequest("En order måste innehålla minst en produkt.");
+            }
+
+            if (order.Id == Guid.Empty)
+            {
+                order.Id = Guid.NewGuid();
+            }
+
+            await _orderDataService.SaveOrder(order);
+
+            return Ok(order);
         }
     }
 }
