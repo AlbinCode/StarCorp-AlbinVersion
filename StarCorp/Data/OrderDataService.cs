@@ -105,7 +105,6 @@ namespace StarCorp.Data
 
         public async Task<Guid> DeleteOrderAsync(Guid id)
         {
-            
             var orders = new List<Order>();
             using (var reader = new StreamReader(ORDERS_FILE_PATH))
             using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
@@ -113,11 +112,14 @@ namespace StarCorp.Data
                 orders = csv.GetRecordsAsync<Order>().ToBlockingEnumerable().ToList();
             }
 
-            var orderToRemove = orders.FirstOrDefault(o => o.Id == id);
-            if (orderToRemove == null) return;
+            var orderToDelete = orders.FirstOrDefault(o => o.Id == id);
 
-            orders.Remove(orderToRemove);
+            if (orderToDelete == null)
+            {
+                throw new ArgumentException("Ordern hittades ej.");
+            }
 
+            orders.Remove(orderToDelete);
             using (var writer = new StreamWriter(ORDERS_FILE_PATH))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
@@ -127,27 +129,53 @@ namespace StarCorp.Data
             if (File.Exists(ORDERLINES_FILE_PATH))
             {
                 var allLines = new List<OrderLine>();
-                using (var reader = new StreamReader(ORDERS_FILE_PATH))
-                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture)) ;
 
+                using (var reader = new StreamReader(ORDERLINES_FILE_PATH))
+                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+                {
+                    allLines = csv.GetRecordsAsync<OrderLine>().ToBlockingEnumerable().ToList();
+                }
+                allLines.RemoveAll(line => line.OrderId == id);
+
+                using (var writer = new StreamWriter(ORDERLINES_FILE_PATH))
+                using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                {
+                    await csv.WriteRecordsAsync(allLines);
+                }
             }
-           
-        }
 
+            return id;
+        }
 
         public async Task<Guid> SaveOrder(IOrder order)
         {
+            bool fileExists = File.Exists(ORDERS_FILE_PATH) && new FileInfo(ORDERS_FILE_PATH).Length > 0;
+
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = !fileExists
+            };
+
             using (var writer = new StreamWriter(ORDERS_FILE_PATH, true))
-            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            using (var csv = new CsvWriter(writer, config))
             {
                 await csv.WriteRecordsAsync(new[] { order });
             }
 
             foreach (var line in order.Lines)
+            {
                 line.OrderId = order.Id;
+            }
+
+            bool linesFileExists = File.Exists(ORDERLINES_FILE_PATH) && new FileInfo(ORDERLINES_FILE_PATH).Length > 0;
+
+            var linesConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = !linesFileExists
+            };
 
             using (var writer = new StreamWriter(ORDERLINES_FILE_PATH, true))
-            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            using (var csv = new CsvWriter(writer, linesConfig))
             {
                 await csv.WriteRecordsAsync(order.Lines);
             }

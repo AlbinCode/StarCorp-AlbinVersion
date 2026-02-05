@@ -77,5 +77,20 @@ namespace StarCorp.Controllers
 
             return Ok(order);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            try
+            {
+                await _orderDataService.DeleteOrderAsync(id);
+
+                return Ok($"Order med ID {id} har tagits bortt.");
+            }
+            catch (ArgumentException)
+            {
+                return NotFound("Kunde inte hitta någon order med det IDt.");
+            }
+        }
     }
 }
