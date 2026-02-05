@@ -15,8 +15,8 @@ namespace StarCorp.Data
     {
         Task<IQueryable<IOrder>> GetOrdersAsync();
         Task<Guid> SaveOrder(IOrder order);
-
         Task<Guid> CreateOrderAsync(IOrder order);
+        Task<Guid> DeleteOrderAsync(Guid id);
     }
 
     /// <summary>
@@ -101,6 +101,37 @@ namespace StarCorp.Data
             }
 
             return order.Id;
+        }
+
+        public async Task<Guid> DeleteOrderAsync(Guid id)
+        {
+            
+            var orders = new List<Order>();
+            using (var reader = new StreamReader(ORDERS_FILE_PATH))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            {
+                orders = csv.GetRecordsAsync<Order>().ToBlockingEnumerable().ToList();
+            }
+
+            var orderToRemove = orders.FirstOrDefault(o => o.Id == id);
+            if (orderToRemove == null) return;
+
+            orders.Remove(orderToRemove);
+
+            using (var writer = new StreamWriter(ORDERS_FILE_PATH))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                await csv.WriteRecordsAsync(orders);
+            }
+
+            if (File.Exists(ORDERLINES_FILE_PATH))
+            {
+                var allLines = new List<OrderLine>();
+                using (var reader = new StreamReader(ORDERS_FILE_PATH))
+                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture)) ;
+
+            }
+           
         }
 
 

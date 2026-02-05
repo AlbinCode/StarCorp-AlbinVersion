@@ -1,0 +1,6 @@
+OrderId,Buyer,DeliveryAddress,TotalValue,OrderLineId,ProductId,Quantity
+b7a6c9e3-1f9c-4c51-8e1f-0d7d3a9f12a1,John Doe,123 Main St Stockholm,1499.50,1a2b3c4d-1111-4aaa-8bbb-123456789001,9f8e7d6c-aaaa-4bbb-cccc-111111111111,2
+b7a6c9e3-1f9c-4c51-8e1f-0d7d3a9f12a1,John Doe,123 Main St Stockholm,1499.50,2b3c4d5e-2222-4bbb-8ccc-123456789002,8e7d6c5b-bbbb-4ccc-dddd-222222222222,1
+d3f1a6b8-5c44-4a2d-9c1e-3f0c5a7b9e21,Jane Smith,45 Queen St Gothenburg,299.99,3c4d5e6f-3333-4ccc-8ddd-123456789003,7d6c5b4a-cccc-4ddd-eeee-333333333333,3
+e91a2c7d-8b2f-4d0c-9a6f-1e3b8c5d0f42,Acme AB,Industrivägen 10 Malmö,9999.00,4d5e6f7a-4444-4ddd-8eee-123456789004,6c5b4a39-dddd-4eee-ffff-444444444444,10
+e91a2c7d-8b2f-4d0c-9a6f-1e3b8c5d0f42,Acme AB,Industrivägen 10 Malmö,9999.00,5e6f7a8b-5555-4eee-8fff-123456789005,5b4a3928-eeee-4fff-aaaa-555555555555,4
