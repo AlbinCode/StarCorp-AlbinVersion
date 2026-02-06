@@ -16,6 +16,7 @@ namespace StarCorp.Data
         Task<IQueryable<IOrder>> GetOrdersAsync();
         Task<Guid> SaveOrder(IOrder order);
         Task<Guid> CreateOrderAsync(IOrder order);
+        Task<Guid> UpdateOrderAsync(IOrder order);
         Task<Guid> DeleteOrderAsync(Guid id);
     }
 
@@ -72,6 +73,62 @@ namespace StarCorp.Data
             return orders.AsQueryable();
         }
 
+        public async Task<Guid> UpdateOrderAsync(IOrder order)
+        {
+            var orders = new List<Order>();
+
+            using (var reader = new StreamReader(ORDERS_FILE_PATH))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            {
+                orders = csv.GetRecordsAsync<Order>().ToBlockingEnumerable().ToList();
+            }
+
+            var existingOrderIndex = orders.FindIndex(o => o.Id == order.Id);
+
+            if (existingOrderIndex == -1)
+            {
+                throw new ArgumentException("Ordern hittades ej.");
+            }
+
+            orders[existingOrderIndex] = (Order)order;
+
+            using (var writer = new StreamWriter(ORDERS_FILE_PATH))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                await csv.WriteRecordsAsync(orders);
+            }
+
+            if (File.Exists(ORDERLINES_FILE_PATH))
+            {
+                var allLines = new List<OrderLine>();
+
+                using (var reader = new StreamReader(ORDERLINES_FILE_PATH))
+                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+                {
+                    allLines = csv.GetRecordsAsync<OrderLine>().ToBlockingEnumerable().ToList();
+                }
+
+                allLines.RemoveAll(line => line.OrderId == order.Id);
+
+                foreach (var line in order.Lines)
+                {
+                    var concreteLine = (OrderLine)line;
+
+                    concreteLine.OrderId = order.Id;
+
+                    if (concreteLine.Id == Guid.Empty) concreteLine.Id = Guid.NewGuid();
+
+                    allLines.Add(concreteLine);
+                }
+
+                using (var writer = new StreamWriter(ORDERLINES_FILE_PATH))
+                using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                {
+                    await csv.WriteRecordsAsync(allLines);
+                }
+            }
+            return order.Id;
+        }
         public async Task<Guid> CreateOrderAsync(IOrder order)
         {
             var fileExists = File.Exists(ORDERS_FILE_PATH) && new FileInfo(ORDERS_FILE_PATH).Length > 0;
