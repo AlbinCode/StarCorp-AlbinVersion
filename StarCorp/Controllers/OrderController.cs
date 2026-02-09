@@ -78,6 +78,25 @@ namespace StarCorp.Controllers
             return Ok(order);
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateOrder(Guid id, [FromBody] Order order)
+        {
+            if (id != order.Id)
+            {
+                return BadRequest("Id i URL Matchar inte ID.");
+            }
+
+            try
+            {
+                await _orderDataService.UpdateOrderAsync(order);
+                return Ok($"Order {id} är uppdaterad.");
+            }
+            catch (ArgumentException)
+            {
+                return NotFound("Kunde ej hitta någon order med detta ID");
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
