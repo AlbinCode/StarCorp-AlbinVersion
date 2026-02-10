@@ -73,7 +73,7 @@ namespace StarCorp.Controllers
                 order.Id = Guid.NewGuid();
             }
 
-            await _orderDataService.SaveOrder(order);
+            await _orderDataService.CreateOrderAsync(order);
 
             return Ok(order);
         }
