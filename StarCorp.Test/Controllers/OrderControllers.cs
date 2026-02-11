@@ -75,5 +75,52 @@ namespace StarCorp.Tests.Controllers
 
             Assert.Equal(2, returnedList.Count);
         }
+
+        [Fact]
+        public async Task Update_ShouldReturnOk_WhenUpdateIsSuccesful()
+        {
+            var orderId = Guid.NewGuid();
+            var updatedOrder = new Order
+            {
+                Id = orderId,
+                Buyer = "Uppdaterad Kalle",
+                Lines = new List<OrderLine>()
+            };
+
+            A.CallTo(() => _orderDataService.UpdateOrderAsync(A<IOrder>._))
+               .Returns(Task.FromResult(updatedOrder.Id));
+
+            var result = await _controller.UpdateOrder(orderId, updatedOrder);
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+
+            Assert.Equal($"Order {orderId} är uppdaterad.", okResult.Value);
+
+            A.CallTo(() => _orderDataService.UpdateOrderAsync(A<IOrder>._))
+                .MustHaveHappenedOnceExactly();
+        }
+
+        [Fact]
+        public async Task Delete_ShouldReturnNoContent_WhenOrderExists()
+        {
+            var orderId = Guid.NewGuid();
+            var orderToDelete = new Order { Id = orderId, Buyer = "Ska Bort" };
+
+            var existingOrders = new List<IOrder> { orderToDelete };
+
+            A.CallTo(() => _orderDataService.GetOrdersAsync())
+                .Returns(Task.FromResult(existingOrders.AsQueryable()));
+
+            A.CallTo(() => _orderDataService.DeleteOrderAsync(A<Guid>._))
+                .Returns(Task.FromResult(Guid.NewGuid()));
+
+            var result = await _controller.Delete(orderId);
+
+            Assert.IsType<NoContentResult>(result);
+
+            A.CallTo(() => _orderDataService.DeleteOrderAsync(A<Guid>._))
+                .MustHaveHappenedOnceExactly();
+
+        }
     }
 }

@@ -104,7 +104,7 @@ namespace StarCorp.Controllers
             {
                 await _orderDataService.DeleteOrderAsync(id);
 
-                return Ok($"Order med ID {id} har tagits bortt.");
+                return NoContent();
             }
             catch (ArgumentException)
             {
