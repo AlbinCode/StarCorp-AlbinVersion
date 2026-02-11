@@ -73,7 +73,7 @@ namespace StarCorp.Controllers
                 order.Id = Guid.NewGuid();
             }
 
-            await _orderDataService.SaveOrder(order);
+            await _orderDataService.CreateOrderAsync(order);
 
             return Ok(order);
         }
@@ -104,7 +104,7 @@ namespace StarCorp.Controllers
             {
                 await _orderDataService.DeleteOrderAsync(id);
 
-                return Ok($"Order med ID {id} har tagits bortt.");
+                return NoContent();
             }
             catch (ArgumentException)
             {
