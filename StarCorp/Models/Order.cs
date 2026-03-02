@@ -10,6 +10,7 @@ namespace StarCorp.Models
     {
         public Guid Id { get; set; }
         public string Buyer { get; set; }
+        public string BuyerEmail { get; set; }
         public string DeliveryAddress { get; set; }
         public decimal TotalValue { get; set; }
         public List<OrderLine> Lines { get; set; } = new List<OrderLine>();

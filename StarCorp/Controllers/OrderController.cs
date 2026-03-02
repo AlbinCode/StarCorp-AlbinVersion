@@ -75,6 +75,28 @@ namespace StarCorp.Controllers
 
             await _orderDataService.CreateOrderAsync(order);
 
+            var mailProperties = new
+            {
+                Buyer = order.Buyer,
+                BuyerEmail = order.BuyerEmail,
+                OrderId = order.Id,
+                DeliveryAddress = order.DeliveryAddress,
+                TotalValue = order.TotalValue
+            };
+
+            try
+            {
+                using var httpClient = new System.Net.Http.HttpClient();
+
+                string functionUrl = "http://localhost:7268/api/SendOrderConfirmation";
+
+                await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(httpClient, functionUrl, mailProperties);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Failed to trigger email function {0}", ex.Message);
+            }
+
             return Ok(order);
         }
 
