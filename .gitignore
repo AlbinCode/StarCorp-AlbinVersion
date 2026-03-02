@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/SendGridMail/host.json
+/SendGridMail/host.json
+/SendGridMail/InternalNotes.md
