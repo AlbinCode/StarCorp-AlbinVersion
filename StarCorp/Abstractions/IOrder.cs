@@ -7,6 +7,7 @@ namespace StarCorp.Abstractions
     {
         Guid Id { get; set; }
         string Buyer { get; set; }
+        string BuyerEmail { get; set; }
         string DeliveryAddress { get; set; }
         decimal TotalValue { get; set; }
         IEnumerable<IOrderLine> Lines { get; set; }
