@@ -18,12 +18,12 @@ namespace StarCorp.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            var productId1 = Guid.Parse("c27f0e32-b1a7-4b93-bd62-0b91e9d8d711");
-            var productId2 = Guid.Parse("a951a77f-1055-4d3a-9d1c-965a2606f121");
-            var orderId = Guid.Parse("10000000-0000-0000-0000-000000000021");
-            var orderLineId = Guid.Parse("aaaa0025-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-            var orderId2 = Guid.Parse("10000000-0000-0000-0000-000000000020");
-            var orderLineId2 = Guid.Parse("aaaa0026-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+            var productId1 = Guid.NewGuid();
+            var productId2 = Guid.NewGuid();
+            var orderId = Guid.NewGuid();
+            var orderLineId = Guid.NewGuid();
+            var orderId2 = Guid.NewGuid();
+            var orderLineId2 = Guid.NewGuid();
 
             modelBuilder.Entity<Product>().HasData(
                 new Product
@@ -53,7 +53,7 @@ namespace StarCorp.Data
                 {
                     Id = orderId,
                     Buyer = "Albin Test",
-                    BuyerEmail = "albin.test@test.com",
+                    BuyerEmail = "albin.test@sqli.com",
                     DeliveryAddress = "Göteborgsvägen 123",
                     TotalValue = 15000
                 }
@@ -74,7 +74,7 @@ namespace StarCorp.Data
                 {
                     Id = orderId2,
                     Buyer = "Test Person 2",
-                    BuyerEmail = "Test.test@test.com",
+                    BuyerEmail = "Test.test@sqli.com",
                     DeliveryAddress = "Kyrkogatan 26",
                     TotalValue = 1100
                 }
