@@ -26,10 +26,8 @@ namespace StarCorp.Controllers
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] string query = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
-            // Hämta alla produkter asynkront
             var allProducts = await _productDataService.GetProductsAsync();
 
-            // Om sökord finns, filtrera listan
             if (!string.IsNullOrEmpty(query))
             {
                 string lowerQuery = query.ToLower();
@@ -54,7 +52,6 @@ namespace StarCorp.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Product product)
         {
-            // Om produkten saknar ID, skapa ett nytt
             if (product.Id == Guid.Empty)
             {
                 product.Id = Guid.NewGuid();
@@ -62,13 +59,11 @@ namespace StarCorp.Controllers
 
             try
             {
-                // Försök spara produkten
                 await _productDataService.CreateProductAsync(product);
                 return Ok(product);
             }
             catch (ArgumentException ex)
             {
-                // Om något gick fel, skicka tillbaka felet
                 return BadRequest(ex.Message);
             }
         }
@@ -76,7 +71,6 @@ namespace StarCorp.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] Product product)
         {
-            // Kolla så att ID i länken stämmer med ID på produkten
             if (id != product.Id)
             {
                 return BadRequest("ID matchar inte.");
@@ -89,7 +83,6 @@ namespace StarCorp.Controllers
             }
             catch (ArgumentException)
             {
-                // Om jag försöker uppdatera en produkt som inte finns
                 return NotFound("Kunde inte hitta produkten.");
             }
         }
@@ -97,10 +90,8 @@ namespace StarCorp.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            // Jag måste hämta listan först för att hitta hela produktobjektet
             var allProducts = await _productDataService.GetProductsAsync();
 
-            // Hitta produkten som har rätt ID
             var productToDelete = allProducts.FirstOrDefault(p => p.Id == id);
 
             if (productToDelete == null)
@@ -108,7 +99,6 @@ namespace StarCorp.Controllers
                 return NotFound("Produkten finns inte.");
             }
 
-            // Ta bort den via servicen
             await _productDataService.DeleteProductAsync(productToDelete);
 
             return Ok();
