@@ -20,8 +20,8 @@ namespace StarCorp.Data
 
             var productId1 = Guid.NewGuid();
             var productId2 = Guid.NewGuid();
-            var orderId = Guid.NewGuid();
-            var orderLineId = Guid.NewGuid();
+            var orderId1 = Guid.NewGuid();
+            var orderLineId1 = Guid.NewGuid();
             var orderId2 = Guid.NewGuid();
             var orderLineId2 = Guid.NewGuid();
 
@@ -51,7 +51,7 @@ namespace StarCorp.Data
             modelBuilder.Entity<Order>().HasData(
                 new Order
                 {
-                    Id = orderId,
+                    Id = orderId1,
                     Buyer = "Albin Test",
                     BuyerEmail = "albin.test@sqli.com",
                     DeliveryAddress = "Göteborgsvägen 123",
@@ -62,8 +62,8 @@ namespace StarCorp.Data
             modelBuilder.Entity<OrderLine>().HasData(
                 new OrderLine
                 {
-                    Id = orderLineId,
-                    OrderId = orderId,
+                    Id = orderLineId1,
+                    OrderId = orderId1,
                     ProductId = productId1,
                     Quantity = 1,
                 }
