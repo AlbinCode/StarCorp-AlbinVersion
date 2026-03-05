@@ -60,12 +60,12 @@ namespace StarCorp.Controllers
         {
             if (order == null)
             {
-                return BadRequest("Ordern saknas.");
+                return BadRequest("Order missing.");
             }
 
             if (order.Lines == null || !order.Lines.Any())
             {
-                return BadRequest("En order måste innehålla minst en produkt.");
+                return BadRequest("An order got to have atleast one product.");
             }
 
             if (order.Id == Guid.Empty)
@@ -105,17 +105,17 @@ namespace StarCorp.Controllers
         {
             if (id != order.Id)
             {
-                return BadRequest("Id i URL Matchar inte ID.");
+                return BadRequest("ID in the url is not the same ID.");
             }
 
             try
             {
                 await _orderDataService.UpdateOrderAsync(order);
-                return Ok($"Order {id} är uppdaterad.");
+                return Ok($"Order {id} is updated.");
             }
-            catch (ArgumentException)
+            catch (Exception)
             {
-                return NotFound("Kunde ej hitta någon order med detta ID");
+                return NotFound("Could not find any order with this ID.");
             }
         }
 
@@ -128,9 +128,9 @@ namespace StarCorp.Controllers
 
                 return NoContent();
             }
-            catch (ArgumentException)
+            catch (Exception)
             {
-                return NotFound("Kunde inte hitta någon order med det IDt.");
+                return NotFound("Could not find any order with this ID.");
             }
         }
     }

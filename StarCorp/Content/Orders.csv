@@ -18,3 +18,4 @@ Id,Buyer,BuyerEmail,DeliveryAddress,TotalValue
 10000000-0000-0000-0000-000000000018,Familjen Svensson,familjen@svensson.ax,Campingvägen 10 Åland,1200
 10000000-0000-0000-0000-000000000019,Gymgrossisten,kundtjanst@gymgrossisten.se,Lyftargränd 50 Göteborg,20000
 10000000-0000-0000-0000-000000000020,Hemligt AB,topsecret@sapo.se,Box 500 Säpo,1
+10000000-0000-0000-0000-000000000021,Albin Test AB,topsecret@test.se,Box 6000 Test,1

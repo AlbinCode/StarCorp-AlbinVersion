@@ -6,6 +6,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using CsvHelper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using StarCorp.Abstractions;
 using StarCorp.Models;
 
@@ -46,26 +48,13 @@ namespace StarCorp.Data
     /// </summary>
     public class ProductDataService : IProductDataService
     {
-        private const string PRODUCTS_FILE_PATH = "Content/Products.csv";
+        private readonly AppDbContext _context;
 
-        public ProductDataService()
-        {
-            if (!File.Exists(PRODUCTS_FILE_PATH))
-            {
-                Directory.CreateDirectory("Content");
-                using (File.Create(PRODUCTS_FILE_PATH)) { }
-                ;
-            }
-        }
 
-        private async Task WriteProductsAsync(IEnumerable<IProduct> products)
+        public ProductDataService(AppDbContext context)
         {
-            using (var writer = new StreamWriter(PRODUCTS_FILE_PATH))
-            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-            {
-                await csv.WriteRecordsAsync(products);
-            }
-            return;
+
+            _context = context;
         }
 
         private void ValidateProduct(IProduct product)
@@ -78,55 +67,73 @@ namespace StarCorp.Data
         {
             ValidateProduct(product);
 
-            var products = (await GetProductsAsync()).ToList();
-            if (products.FirstOrDefault(p => p.Id == product.Id) != null)
-                throw new ArgumentException("Cannot create new product. Product with this ID already exist");
+            var exists = await _context.Products.AnyAsync(p=> p.Id == product.Id);
+            if (exists) 
+            {
+                throw new ArgumentException("Cannot Create new product, Product with that ID already exists");
+            }
 
-            products.Add(product);
-            await WriteProductsAsync(products);
-            return product;
+            var newProduct = (Product)product;
+
+            _context.Products.Add(newProduct);
+            await _context.SaveChangesAsync();
+
+            return newProduct;  
         }
 
-        public async Task<IQueryable<IProduct>> GetProductsAsync()
+        public async Task <IQueryable<IProduct>> GetProductsAsync()
         {
-            using (var reader = new StreamReader(PRODUCTS_FILE_PATH))
-            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
-            {
-                var products = csv.GetRecordsAsync<Product>().ToBlockingEnumerable().ToList();
-                return products.AsQueryable();
-            }
+            return await Task.FromResult<IQueryable<IProduct>>(_context.Products);
         }
 
         public async Task<IProduct> UpdateProductAsync(IProduct product)
         {
             ValidateProduct(product);
 
-            var products = (await GetProductsAsync()).ToList();
-            var updatingProductIndex = products.IndexOf(product);
+            var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == product.Id);
 
-            if (updatingProductIndex < 0 || updatingProductIndex >= products.Count)
-                throw new ArgumentException("Cannot update product. Product doesn't exist. Ensure Product.Id is correct.");
-
-            var updatingProduct = products[updatingProductIndex];
-
-            var properties = typeof(Product).GetProperties(BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public);
-            foreach (var prop in properties)
+            if (existingProduct == null)
             {
-                var incomingValue = prop.GetValue(product);
-                if (incomingValue != null)
-                    prop.SetValue(updatingProduct, incomingValue);
+                throw new ArgumentException("Cannot update product.");
             }
-            await WriteProductsAsync(products);
 
-            return updatingProduct;
+            var newProduct = (Product)product;
+
+            if (newProduct.Name != null)
+            {
+                existingProduct.Name = newProduct.Name;
+            }
+
+            if (newProduct.Description != null)
+            {
+                existingProduct.Description = newProduct.Description;
+            }
+
+            if (newProduct.Price > 0)
+            {
+                existingProduct.Price = newProduct.Price;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return existingProduct;
         }
 
         public async Task DeleteProductAsync(IProduct product)
         {
             ValidateProduct(product);
-            var products = (await GetProductsAsync()).ToList();
-            products.Remove(product);
-            await WriteProductsAsync(products);
+            
+            var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == product.Id);
+
+            if (existingProduct == null)
+            {
+                throw new ArgumentException("Product not found and cannot be deleted");
+            }
+            if (existingProduct != null)
+            {
+                _context.Products.Remove(existingProduct);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
