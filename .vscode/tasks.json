@@ -1,0 +1,51 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/StarCorp.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "run-main",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "${workspaceFolder}/StarCorp/StarCorp.csproj"
+            ],
+            "isBackground": true,
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "run-function",
+            "type": "process",
+            "command": "func",
+            "args": [
+                "start"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/SendGridMail"
+            },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "run-all",
+            "dependsOn": [
+                "run-main",
+                "run-function"
+            ],
+            "dependsOrder": "parallel"
+        }
+    ]
+}
