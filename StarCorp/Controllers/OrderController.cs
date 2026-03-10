@@ -68,6 +68,8 @@ namespace StarCorp.Controllers
                 return BadRequest("An order got to have atleast one product.");
             }
 
+            order.Id = Guid.NewGuid();
+
             if (order.Id == Guid.Empty)
             {
                 order.Id = Guid.NewGuid();
