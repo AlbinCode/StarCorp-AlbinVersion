@@ -68,6 +68,8 @@ namespace StarCorp.Controllers
                 return BadRequest("An order got to have atleast one product.");
             }
 
+            order.Id = Guid.NewGuid();
+
             if (order.Id == Guid.Empty)
             {
                 order.Id = Guid.NewGuid();
@@ -88,7 +90,7 @@ namespace StarCorp.Controllers
             {
                 using var httpClient = new System.Net.Http.HttpClient();
 
-                string functionUrl = "http://localhost:7268/api/SendOrderConfirmation";
+                string functionUrl = "http://localhost:7071/api/SendOrderConfirmation";
 
                 await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(httpClient, functionUrl, mailProperties);
             }
