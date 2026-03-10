@@ -88,7 +88,7 @@ namespace StarCorp.Controllers
             {
                 using var httpClient = new System.Net.Http.HttpClient();
 
-                string functionUrl = "http://localhost:7268/api/SendOrderConfirmation";
+                string functionUrl = "http://localhost:7071/api/SendOrderConfirmation";
 
                 await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(httpClient, functionUrl, mailProperties);
             }
