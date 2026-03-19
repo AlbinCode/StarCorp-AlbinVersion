@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using StarCorp.Carts;
 using StarCorp.Models;
 using System;
 
@@ -10,9 +11,9 @@ namespace StarCorp.Data
         {
         }
         public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderLine> OrderLines { get; set; }
+        public DbSet<LineItem> OrderLines { get; set; }
         public DbSet<Product> Products { get; set; }
-    
+        public DbSet<Cart> Carts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,7 +33,7 @@ namespace StarCorp.Data
                     Name = "Gaming Laptop",
                     Description = "Laptop",
                     Brand = "Lenovo",
-                    Price = 1500,
+                    Price = 1500m,
                     Category = "Electronics",
                     Stock = 10
                 },
@@ -42,7 +43,7 @@ namespace StarCorp.Data
                     Name = "Wireless Mouse",
                     Description = "Good Wireless mouse",
                     Brand = "Logitech",
-                    Price = 500,
+                    Price = 500m,
                     Category = "Electronics",
                     Stock = 50
                 }
@@ -55,38 +56,34 @@ namespace StarCorp.Data
                     Buyer = "Albin Test",
                     BuyerEmail = "albin.test@sqli.com",
                     DeliveryAddress = "Göteborgsvägen 123",
-                    TotalValue = 15000
-                }
-            );
-
-            modelBuilder.Entity<OrderLine>().HasData(
-                new OrderLine
-                {
-                    Id = orderLineId1,
-                    OrderId = orderId1,
-                    ProductId = productId1,
-                    Quantity = 1,
-                }
-            );
-
-            modelBuilder.Entity<Order>().HasData(
+                    TotalValue = 1500m
+                },
                 new Order
                 {
                     Id = orderId2,
                     Buyer = "Test Person 2",
                     BuyerEmail = "Test.test@sqli.com",
                     DeliveryAddress = "Kyrkogatan 26",
-                    TotalValue = 1100
+                    TotalValue = 1000m
                 }
             );
 
-            modelBuilder.Entity<OrderLine>().HasData(
-                new OrderLine
+            modelBuilder.Entity<LineItem>().HasData(
+                new
+                {
+                    Id = orderLineId1,
+                    ProductId = productId1,
+                    Quantity = 1u,
+                    Price = 1500m,
+                    OrderId = orderId1
+                },
+                new
                 {
                     Id = orderLineId2,
-                    OrderId = orderId2,
                     ProductId = productId2,
-                    Quantity = 2,
+                    Quantity = 2u,
+                    Price = 500m,
+                    OrderId = orderId2
                 }
             );
         }

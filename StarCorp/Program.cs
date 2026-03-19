@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using StarCorp.Carts;
 using StarCorp.Data;
 using StarCorp.Models;
 using System.Globalization;
@@ -26,6 +27,7 @@ namespace StarCorp
 
             builder.Services.AddScoped<IProductDataService, ProductDataService>();
             builder.Services.AddScoped<IOrderDataService, OrderDataService>();
+            builder.Services.AddScoped<ICartService, CartService>();
             var dir = Directory.GetParent(Assembly.GetExecutingAssembly().Location);
             if (dir != null)
                 Directory.SetCurrentDirectory(dir.ToString());

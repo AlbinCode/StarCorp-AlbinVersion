@@ -13,13 +13,13 @@ namespace StarCorp.Models
         public string BuyerEmail { get; set; }
         public string DeliveryAddress { get; set; }
         public decimal TotalValue { get; set; }
-        public List<OrderLine> Lines { get; set; } = new List<OrderLine>();
+        public List<LineItem> Lines { get; set; } = new List<LineItem>();
 
         [Ignore]
-        IEnumerable<IOrderLine> IOrder.Lines
+        IEnumerable<ILineItem> IOrder.Lines
         {
             get => Lines;
-            set => Lines = value?.Cast<OrderLine>().ToList() ?? new List<OrderLine>();
+            set => Lines = value?.Cast<LineItem>().ToList() ?? new List<LineItem>();
         }
 
         public bool Equals(IOrder? other)

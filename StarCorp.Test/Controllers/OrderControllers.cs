@@ -33,9 +33,9 @@ namespace StarCorp.Tests.Controllers
             {
                 Id = Guid.NewGuid(),
                 Buyer = "Test-Kalle",
-                Lines = new List<OrderLine>
+                Lines = new List<LineItem>
                 {
-                    new OrderLine { ProductId = Guid.NewGuid(), Quantity = 1 }
+                    new LineItem { ProductId = Guid.NewGuid(), Quantity = 1 }
                 }
             };
 
@@ -84,7 +84,7 @@ namespace StarCorp.Tests.Controllers
             {
                 Id = orderId,
                 Buyer = "Uppdaterad Kalle",
-                Lines = new List<OrderLine>()
+                Lines = new List<LineItem>()
             };
 
             A.CallTo(() => _orderDataService.UpdateOrderAsync(A<IOrder>._))
