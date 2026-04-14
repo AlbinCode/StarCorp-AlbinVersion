@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using CsvHelper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using StarCorp.Abstractions;
 using StarCorp.Models;
 
@@ -63,7 +62,7 @@ namespace StarCorp.Data
             ArgumentNullException.ThrowIfNull(product.Id);
         }
 
-        public async Task<IProduct> CreateProductAsync(IProduct product)
+        public async Task <IProduct> CreateProductAsync(IProduct product)
         {
             ValidateProduct(product);
 

@@ -1,9 +1,8 @@
-﻿using StarCorp.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace StarCorp.Carts
+namespace StarCorp.Models
 {
     public class Cart
     {

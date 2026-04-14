@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using StarCorp.Carts;
 using StarCorp.Models;
 using System;
 
@@ -10,8 +9,13 @@ namespace StarCorp.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder
+                .EnableSensitiveDataLogging();
+        }
         public DbSet<Order> Orders { get; set; }
-        public DbSet<LineItem> OrderLines { get; set; }
+        public DbSet<LineItem> LineItems { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Cart> Carts { get; set; }
 
@@ -75,6 +79,7 @@ namespace StarCorp.Data
                     ProductId = productId1,
                     Quantity = 1u,
                     Price = 1500m,
+                    InStock = true,
                     OrderId = orderId1
                 },
                 new
@@ -83,6 +88,7 @@ namespace StarCorp.Data
                     ProductId = productId2,
                     Quantity = 2u,
                     Price = 500m,
+                    InStock = true,
                     OrderId = orderId2
                 }
             );
