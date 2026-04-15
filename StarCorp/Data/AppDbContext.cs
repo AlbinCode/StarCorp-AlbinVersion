@@ -79,7 +79,6 @@ namespace StarCorp.Data
                     ProductId = productId1,
                     Quantity = 1u,
                     Price = 1500m,
-                    InStock = true,
                     OrderId = orderId1
                 },
                 new
@@ -88,7 +87,6 @@ namespace StarCorp.Data
                     ProductId = productId2,
                     Quantity = 2u,
                     Price = 500m,
-                    InStock = true,
                     OrderId = orderId2
                 }
             );
