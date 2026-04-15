@@ -39,20 +39,6 @@ namespace StarCorp.Data
                 throw new ResourceNotFoundException(nameof(Cart), cart.Id);
             }
 
-            foreach (var lineItem in cart.LineItems)
-            {
-                var product = _context.Products.FirstOrDefault(x => x.Id == lineItem.ProductId);
-
-                if (product != null)
-                {
-                    lineItem.InStock = product.Stock > 0;
-                }
-                else
-                {
-                    lineItem.InStock = false;
-                }
-            }
-
             return cart;
             
         }
