@@ -34,21 +34,7 @@ namespace StarCorp.Data
 
             if (cart == null)
             {
-                return null;
-            }
-
-            foreach (var lineItem in cart.LineItems)
-            {
-                var product = _context.Products.FirstOrDefault(x => x.Id == lineItem.ProductId);
-
-                if (product != null)
-                {
-                    lineItem.InStock = product.Stock > 0;
-                }
-                else
-                {
-                    lineItem.InStock = false;
-                }
+                throw new ResourceNotFoundException(nameof(Cart), cart.Id);
             }
 
             return cart;

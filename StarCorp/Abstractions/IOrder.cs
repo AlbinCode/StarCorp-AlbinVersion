@@ -18,7 +18,6 @@ namespace StarCorp.Abstractions
     {
         Guid Id { get; set; }
         Guid ProductId { get; set; }
-        public bool InStock { get; set; }
         uint Quantity { get; set; }
         decimal Price { get; set; }
     }
