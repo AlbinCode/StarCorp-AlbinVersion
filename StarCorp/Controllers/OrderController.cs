@@ -2,10 +2,10 @@
 using Microsoft.Extensions.Logging;
 using StarCorp.Data;
 using StarCorp.Models;
+using StarCorp.Carts;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-
 
 namespace StarCorp.Controllers
 {
@@ -16,12 +16,21 @@ namespace StarCorp.Controllers
         private readonly ILogger<OrderController> _logger;
         private readonly IProductDataService _productDataService;
         private readonly IOrderDataService _orderDataService;
+        private readonly ICartService _cartService;
+        private readonly AppDbContext _context;
 
-        public OrderController(ILogger<OrderController> logger, IProductDataService productDataService, IOrderDataService orderDataService)
+        public OrderController(
+            ILogger<OrderController> logger,
+            IProductDataService productDataService,
+            IOrderDataService orderDataService,
+            ICartService cartService,
+            AppDbContext context)
         {
             _logger = logger;
             _productDataService = productDataService;
             _orderDataService = orderDataService;
+            _cartService = cartService;
+            _context = context;
         }
 
         [HttpGet]
@@ -32,7 +41,6 @@ namespace StarCorp.Controllers
             if (!string.IsNullOrEmpty(query))
             {
                 string lowerQuery = query.ToLower();
-
                 var allProducts = await _productDataService.GetProductsAsync();
 
                 var matchingProductIds = allProducts
@@ -51,47 +59,46 @@ namespace StarCorp.Controllers
                 .ToList();
 
             return Ok(result);
-
-
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Order order)
+        [HttpPost("checkout/{cartId}")]
+        public async Task<IActionResult> Checkout(Guid cartId, [FromBody] Order orderDetails)
         {
-            if (order == null)
+            var cart = await _cartService.GetCartAsync(cartId);
+
+            if (cart == null || !cart.LineItems.Any())
             {
-                return BadRequest("Order missing.");
+                return BadRequest("Cart is missing or empty. Cannot create an order.");
             }
 
-            if (order.Lines == null || !order.Lines.Any())
+            orderDetails.Id = Guid.NewGuid();
+
+            orderDetails.Lines = cart.LineItems.Select(item => new LineItem
             {
-                return BadRequest("An order got to have atleast one product.");
-            }
+                Id = Guid.NewGuid(),
+                ProductId = item.ProductId,
+                Quantity = item.Quantity,
+                Price = item.Price
+            }).ToList();
 
-            order.Id = Guid.NewGuid();
+            await _orderDataService.CreateOrderAsync(orderDetails);
 
-            if (order.Id == Guid.Empty)
-            {
-                order.Id = Guid.NewGuid();
-            }
-
-            await _orderDataService.CreateOrderAsync(order);
+            _context.Carts.Remove(cart);
+            await _context.SaveChangesAsync();
 
             var mailProperties = new
             {
-                Buyer = order.Buyer,
-                BuyerEmail = order.BuyerEmail,
-                OrderId = order.Id,
-                DeliveryAddress = order.DeliveryAddress,
-                TotalValue = order.TotalValue
+                Buyer = orderDetails.Buyer,
+                BuyerEmail = orderDetails.BuyerEmail,
+                OrderId = orderDetails.Id,
+                DeliveryAddress = orderDetails.DeliveryAddress,
+                TotalValue = orderDetails.TotalValue
             };
 
             try
             {
                 using var httpClient = new System.Net.Http.HttpClient();
-
                 string functionUrl = "http://localhost:7071/api/SendOrderConfirmation";
-
                 await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(httpClient, functionUrl, mailProperties);
             }
             catch (Exception ex)
@@ -99,7 +106,7 @@ namespace StarCorp.Controllers
                 _logger.LogError("Failed to trigger email function {0}", ex.Message);
             }
 
-            return Ok(order);
+            return Ok(orderDetails);
         }
 
         [HttpPut("{id}")]
@@ -127,7 +134,6 @@ namespace StarCorp.Controllers
             try
             {
                 await _orderDataService.DeleteOrderAsync(id);
-
                 return NoContent();
             }
             catch (Exception)

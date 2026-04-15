@@ -1,3 +1,4 @@
+using StarCorp.Models;
 using System;
 using System.Collections.Generic;
 
@@ -10,14 +11,15 @@ namespace StarCorp.Abstractions
         string BuyerEmail { get; set; }
         string DeliveryAddress { get; set; }
         decimal TotalValue { get; set; }
-        IEnumerable<IOrderLine> Lines { get; set; }
+        IEnumerable<ILineItem> Lines { get; set; }
     }
 
-    public interface IOrderLine
+    public interface ILineItem
     {
         Guid Id { get; set; }
-        Guid OrderId { get; set; }
         Guid ProductId { get; set; }
+        Product Product { get; set; }
         uint Quantity { get; set; }
+        decimal Price { get; set; }
     }
 }
