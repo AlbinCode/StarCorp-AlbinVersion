@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using StarCorp.Abstractions;
+using StarCorp.Exceptions;
 using StarCorp.Models;
 using System;
 using System.Collections.Generic;
@@ -34,7 +36,7 @@ namespace StarCorp.Data
 
             if (cart == null)
             {
-                return null;
+                throw new ResourceNotFoundException(nameof(Cart), cart.Id);
             }
 
             foreach (var lineItem in cart.LineItems)
@@ -98,7 +100,10 @@ namespace StarCorp.Data
                 .Include(c => c.LineItems)
                 .FirstOrDefaultAsync(c => c.Id == cartId);
 
-            if (cart == null) return null;
+            if (cart == null)
+            {
+                return null;
+            }
 
             var itemToRemove = cart.LineItems.FirstOrDefault(i => i.ProductId == productId);
 

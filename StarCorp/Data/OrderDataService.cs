@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StarCorp.Abstractions;
+using StarCorp.Exceptions;
 using StarCorp.Models;
 using System;
 using System.Linq;
@@ -41,6 +42,13 @@ namespace StarCorp.Data
         }
         public async Task<Guid> UpdateOrderAsync(IOrder order)
         {
+            var exists = await _context.Orders.AnyAsync(o => o.Id == order.Id);
+
+            if (!exists)
+            {
+                throw new ResourceNotFoundException(nameof(Order), order.Id);
+            }
+
             var updatedOrder = (Order)order;
 
             _context.Orders.Update(updatedOrder);
@@ -50,10 +58,13 @@ namespace StarCorp.Data
         }
         public async Task<Guid> DeleteOrderAsync(Guid id)
         {
-            var orderToDelete = (Order)_context.Orders.Find(id);
+            var orderToDelete = await _context.Orders.FindAsync(id);
 
-            _context.Orders.Remove(orderToDelete);
-            _context.SaveChanges();
+            if (orderToDelete != null)
+            {
+                _context.Orders.Remove(orderToDelete);
+                await _context.SaveChangesAsync();
+            }
 
             return id;
         }

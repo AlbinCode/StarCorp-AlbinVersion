@@ -9,7 +9,7 @@ using CsvHelper;
 using Microsoft.EntityFrameworkCore;
 using StarCorp.Abstractions;
 using StarCorp.Models;
-
+using StarCorp.Exceptions;
 namespace StarCorp.Data
 {
     public interface IProductDataService
@@ -62,12 +62,12 @@ namespace StarCorp.Data
             ArgumentNullException.ThrowIfNull(product.Id);
         }
 
-        public async Task <IProduct> CreateProductAsync(IProduct product)
+        public async Task<IProduct> CreateProductAsync(IProduct product)
         {
             ValidateProduct(product);
 
-            var exists = await _context.Products.AnyAsync(p=> p.Id == product.Id);
-            if (exists) 
+            var exists = await _context.Products.AnyAsync(p => p.Id == product.Id);
+            if (exists)
             {
                 throw new ArgumentException("Cannot Create new product, Product with that ID already exists");
             }
@@ -77,10 +77,10 @@ namespace StarCorp.Data
             _context.Products.Add(newProduct);
             await _context.SaveChangesAsync();
 
-            return newProduct;  
+            return newProduct;
         }
 
-        public async Task <IQueryable<IProduct>> GetProductsAsync()
+        public async Task<IQueryable<IProduct>> GetProductsAsync()
         {
             return await Task.FromResult<IQueryable<IProduct>>(_context.Products);
         }
@@ -93,7 +93,7 @@ namespace StarCorp.Data
 
             if (existingProduct == null)
             {
-                throw new ArgumentException("Cannot update product.");
+                throw new ResourceNotFoundException(nameof(Product), product.Id);
             }
 
             var newProduct = (Product)product;
@@ -121,18 +121,16 @@ namespace StarCorp.Data
         public async Task DeleteProductAsync(IProduct product)
         {
             ValidateProduct(product);
-            
+
             var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == product.Id);
 
-            if (existingProduct == null)
-            {
-                throw new ArgumentException("Product not found and cannot be deleted");
-            }
             if (existingProduct != null)
             {
                 _context.Products.Remove(existingProduct);
                 await _context.SaveChangesAsync();
             }
+
         }
     }
 }
+
