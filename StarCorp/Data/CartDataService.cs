@@ -1,19 +1,28 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using StarCorp.Data;
+using StarCorp.Abstractions;
+using StarCorp.Exceptions;
 using StarCorp.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace StarCorp.Carts
+namespace StarCorp.Data
 {
-    public class CartService : ICartService
+    public interface ICartService
+    {
+        Task<Cart?> GetCartAsync(Guid cartId);
+        Task<Cart> AddProductToCartAsync(Guid cartId, LineItem item);
+        Task<Cart?> RemoveProductFromCartAsync(Guid cartId, Guid productId);
+    }
+
+        public class CartDataService : ICartService
     {
         private readonly AppDbContext _context;
-        private readonly ILogger<CartService> _logger;
+        private readonly ILogger<CartDataService> _logger;
 
-        public CartService(AppDbContext context, ILogger<CartService> logger)
+        public CartDataService(AppDbContext context, ILogger<CartDataService> logger)
         {
             _context = context;
             _logger = logger;
@@ -21,14 +30,41 @@ namespace StarCorp.Carts
 
         public async Task<Cart?> GetCartAsync(Guid cartId)
         {
-            return await _context.Carts
+            var cart = await _context.Carts
              .Include(c => c.LineItems)
-             .ThenInclude(li => li.Product)
              .FirstOrDefaultAsync(c => c.Id == cartId);
-        }
 
+            if (cart == null)
+            {
+                throw new ResourceNotFoundException(nameof(Cart), cart.Id);
+            }
+
+            foreach (var lineItem in cart.LineItems)
+            {
+                var product = _context.Products.FirstOrDefault(x => x.Id == lineItem.ProductId);
+
+                if (product != null)
+                {
+                    lineItem.InStock = product.Stock > 0;
+                }
+                else
+                {
+                    lineItem.InStock = false;
+                }
+            }
+
+            return cart;
+            
+        }
         public async Task<Cart> AddProductToCartAsync(Guid cartId, LineItem item)
         {
+            var product = await _context.Products.FindAsync(item.ProductId);
+
+            if (product == null)
+            {
+                throw new ArgumentException($"Product with this ID {item.ProductId} does not exist.");
+            }
+
             var cart = await _context.Carts
                 .Include(c => c.LineItems)
                 .FirstOrDefaultAsync(c => c.Id == cartId);
@@ -48,6 +84,7 @@ namespace StarCorp.Carts
             }
             else
             {
+
                 item.Id = item.Id == Guid.Empty ? Guid.NewGuid() : item.Id;
                 cart.LineItems.Add(item);
             }
@@ -63,7 +100,10 @@ namespace StarCorp.Carts
                 .Include(c => c.LineItems)
                 .FirstOrDefaultAsync(c => c.Id == cartId);
 
-            if (cart == null) return null;
+            if (cart == null)
+            {
+                return null;
+            }
 
             var itemToRemove = cart.LineItems.FirstOrDefault(i => i.ProductId == productId);
 
