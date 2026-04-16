@@ -15,6 +15,7 @@ namespace StarCorp.Data
         Task<Cart?> GetCartAsync(Guid cartId);
         Task<Cart> AddProductToCartAsync(Guid cartId, LineItem item);
         Task<Cart?> RemoveProductFromCartAsync(Guid cartId, Guid productId);
+        Task DeleteCartAsync(Guid cartId);
     }
 
         public class CartDataService : ICartService
@@ -102,6 +103,16 @@ namespace StarCorp.Data
             }
 
             return cart;
+        }
+
+        public async Task DeleteCartAsync(Guid cartId)
+        {
+            var cart = await _context.Carts.FindAsync(cartId);
+            if (cart != null)
+            {
+                _context.Carts.Remove(cart);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

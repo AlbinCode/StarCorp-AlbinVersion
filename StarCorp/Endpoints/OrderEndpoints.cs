@@ -61,12 +61,11 @@ namespace StarCorp.Endpoints
         }
 
         public static async Task<IResult> Checkout(
-            Guid cartId,
-            [FromBody] Order orderDetails,
-            ICartService cartService,
-            IOrderDataService orderDataService,
-            AppDbContext context,
-            ILogger<Order> logger)
+             Guid cartId,
+             [FromBody] Order orderDetails,
+             ICartService cartService,
+             IOrderDataService orderDataService,
+             ILogger<Order> logger)
         {
             var cart = await cartService.GetCartAsync(cartId);
 
@@ -87,8 +86,7 @@ namespace StarCorp.Endpoints
 
             await orderDataService.CreateOrderAsync(orderDetails);
 
-            context.Carts.Remove(cart);
-            await context.SaveChangesAsync();
+            await cartService.DeleteCartAsync(cartId);
 
             var mailProperties = new
             {
@@ -140,7 +138,7 @@ namespace StarCorp.Endpoints
             }
             catch (Exception)
             {
-                return Results.NotFound("Could not find any order with this ID.");
+                throw new ResourceNotFoundException(nameof(Order), id);
             }
         }
     }
