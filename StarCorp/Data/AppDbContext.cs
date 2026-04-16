@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using StarCorp.Models;
 using System;
 
@@ -9,11 +10,7 @@ namespace StarCorp.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder
-                .EnableSensitiveDataLogging();
-        }
+
         public DbSet<Order> Orders { get; set; }
         public DbSet<LineItem> LineItems { get; set; }
         public DbSet<Product> Products { get; set; }

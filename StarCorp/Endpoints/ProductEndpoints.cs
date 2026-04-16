@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using StarCorp.Abstractions;
 using StarCorp.Data;
 using StarCorp.Models;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace StarCorp.Endpoints
 {
@@ -13,89 +15,93 @@ namespace StarCorp.Endpoints
     {
         public static void MapProductEndpoints(this IEndpointRouteBuilder app)
         {
-            var group = app.MapGroup("/api/products")
-                .WithTags("Products");
+            var group = app.MapGroup("/api/products").WithTags("Products");
 
-            group.MapGet("/", async (
-                [FromQuery] string? query,
-                [FromQuery] int? page,
-                [FromQuery] int? pageSize,
-                IProductDataService productDataService) =>
+            group.MapGet("/", GetProducts);
+            group.MapPost("/", CreateProduct);
+            group.MapPut("/{id}", UpdateProduct);
+            group.MapDelete("/{id}", DeleteProduct);
+        }
+
+        public static async Task<IResult> GetProducts(
+            [FromQuery] string? query,
+            [FromQuery] int? page,
+            [FromQuery] int? pageSize,
+            IProductDataService productDataService)
+        {
+            int currentPage = page ?? 1;
+            int currentSize = pageSize ?? 20;
+
+            var allProducts = await productDataService.GetProductsAsync();
+
+            if (!string.IsNullOrEmpty(query))
             {
-                int currentPage = page ?? 1;
-                int currentSize = pageSize ?? 20;
+                string lowerQuery = query.ToLower();
 
-                var allProducts = await productDataService.GetProductsAsync();
+                allProducts = allProducts.Where(p =>
+                    (p.Name != null && p.Name.ToLower().Contains(lowerQuery)) ||
+                    (p.Description != null && p.Description.ToLower().Contains(lowerQuery)) ||
+                    (p.Brand != null && p.Brand.ToLower().Contains(lowerQuery)) ||
+                    (p.Category != null && p.Category.ToLower().Contains(lowerQuery))
+                );
+            }
 
-                if (!string.IsNullOrEmpty(query))
-                {
-                    string lowerQuery = query.ToLower();
+            var result = allProducts
+                .Skip((currentPage - 1) * currentSize)
+                .Take(currentSize)
+                .ToList();
 
-                    allProducts = allProducts.Where(p =>
-                        (p.Name != null && p.Name.ToLower().Contains(lowerQuery)) ||
-                        (p.Description != null && p.Description.ToLower().Contains(lowerQuery)) ||
-                        (p.Brand != null && p.Brand.ToLower().Contains(lowerQuery)) ||
-                        (p.Category != null && p.Category.ToLower().Contains(lowerQuery))
-                    );
-                }
+            return Results.Ok(result);
+        }
 
-                var result = allProducts
-                    .Skip((currentPage - 1) * currentSize)
-                    .Take(currentSize)
-                    .ToList();
-
-                return Results.Ok(result);
-            });
-
-            group.MapPost("/", async (Product product, IProductDataService productDataService) =>
+        public static async Task<IResult> CreateProduct(Product product, IProductDataService productDataService)
+        {
+            if (product.Id == Guid.Empty)
             {
-                if (product.Id == Guid.Empty)
-                {
-                    product.Id = Guid.NewGuid();
-                }
+                product.Id = Guid.NewGuid();
+            }
 
-                try
-                {
-                    await productDataService.CreateProductAsync(product);
-                    return Results.Ok(product);
-                }
-                catch (ArgumentException ex)
-                {
-                    return Results.BadRequest(ex.Message);
-                }
-            });
-
-            group.MapPut("/{id}", async (Guid id, Product product, IProductDataService productDataService) =>
+            try
             {
-                if (id != product.Id)
-                {
-                    return Results.BadRequest("ID does not match.");
-                }
-
-                try
-                {
-                    await productDataService.UpdateProductAsync(product);
-                    return Results.Ok(product);
-                }
-                catch (ArgumentException)
-                {
-                    return Results.NotFound("Could not find the product.");
-                }
-            });
-
-            group.MapDelete("/{id}", async (Guid id, IProductDataService productDataService) =>
+                await productDataService.CreateProductAsync(product);
+                return Results.Ok(product);
+            }
+            catch (ArgumentException ex)
             {
-                var allProducts = await productDataService.GetProductsAsync();
-                var productToDelete = allProducts.FirstOrDefault(p => p.Id == id);
+                return Results.BadRequest(ex.Message);
+            }
+        }
 
-                if (productToDelete == null)
-                {
-                    return Results.NotFound("Product do not exist.");
-                }
+        public static async Task<IResult> UpdateProduct(Guid id, Product product, IProductDataService productDataService)
+        {
+            if (id != product.Id)
+            {
+                return Results.BadRequest("ID does not match.");
+            }
 
-                await productDataService.DeleteProductAsync(productToDelete);
-                return Results.Ok();
-            });
+            try
+            {
+                await productDataService.UpdateProductAsync(product);
+                return Results.Ok(product);
+            }
+            catch (ArgumentException)
+            {
+                return Results.NotFound("Could not find the product.");
+            }
+        }
+
+        public static async Task<IResult> DeleteProduct(Guid id, IProductDataService productDataService)
+        {
+            var allProducts = await productDataService.GetProductsAsync();
+            var productToDelete = allProducts.FirstOrDefault(p => p.Id == id);
+
+            if (productToDelete == null)
+            {
+                return Results.NotFound("Product do not exist.");
+            }
+
+            await productDataService.DeleteProductAsync(productToDelete);
+            return Results.Ok();
         }
     }
 }
