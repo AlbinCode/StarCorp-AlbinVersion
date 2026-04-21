@@ -7,9 +7,8 @@ namespace StarCorp.Abstractions
     public interface IOrder : IEquatable<IOrder>
     {
         Guid Id { get; set; }
-        string Buyer { get; set; }
-        string BuyerEmail { get; set; }
-        string DeliveryAddress { get; set; }
+        public Guid BuyerId { get; set; }
+        Buyer Buyer { get; set; }
         decimal TotalValue { get; set; }
         IEnumerable<ILineItem> Lines { get; set; }
     }

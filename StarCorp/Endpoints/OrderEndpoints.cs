@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using StarCorp.Abstractions;
+using System.ComponentModel.DataAnnotations;
 
 namespace StarCorp.Endpoints
 {
@@ -48,7 +49,7 @@ namespace StarCorp.Endpoints
                  .ToList();
 
                 allOrders = allOrders.Where(o =>
-                (o.Buyer != null && o.Buyer.ToLower().Contains(lowerQuery)) ||
+                (o.Buyer != null && o.Buyer.Name != null && o.Buyer.Name.ToLower().Contains(lowerQuery)) ||
                 (o.Lines.Any(line => matchingProductIds.Contains(line.ProductId))));
             }
 
@@ -61,11 +62,11 @@ namespace StarCorp.Endpoints
         }
 
         public static async Task<IResult> Checkout(
-             Guid cartId,
-             [FromBody] Order orderDetails,
-             ICartService cartService,
-             IOrderDataService orderDataService,
-             ILogger<Order> logger)
+           Guid cartId,
+           [FromBody] Order orderDetails,
+           ICartService cartService,
+           IOrderDataService orderDataService,
+           ILogger<Order> logger)
         {
             var cart = await cartService.GetCartAsync(cartId);
 
@@ -76,6 +77,15 @@ namespace StarCorp.Endpoints
 
             orderDetails.Id = Guid.NewGuid();
 
+            if (orderDetails.Buyer != null)
+            {
+                if (orderDetails.Buyer.Id == Guid.Empty)
+                {
+                    orderDetails.Buyer.Id = Guid.NewGuid();
+                }
+                orderDetails.BuyerId = orderDetails.Buyer.Id;
+            }
+
             orderDetails.Lines = cart.LineItems.Select(item => new LineItem
             {
                 Id = Guid.NewGuid(),
@@ -84,44 +94,65 @@ namespace StarCorp.Endpoints
                 Price = item.Price
             }).ToList();
 
-            await orderDataService.CreateOrderAsync(orderDetails);
-
-            await cartService.DeleteCartAsync(cartId);
-
-            var mailProperties = new
-            {
-                orderDetails.Buyer,
-                orderDetails.BuyerEmail,
-                orderDetails.Id,
-                orderDetails.DeliveryAddress,
-                orderDetails.TotalValue
-            };
+            orderDetails.TotalValue = orderDetails.Lines.Sum(item => item.Price * item.Quantity);
 
             try
             {
-                using var httpClient = new System.Net.Http.HttpClient();
-                string functionUrl = "http://localhost:7071/api/SendOrderConfirmation";
-                await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(httpClient, functionUrl, mailProperties);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError("Failed to trigger email function {0}", ex.Message);
-            }
+                if (orderDetails.Buyer != null)
+                {
+                    ModelValidationException.ThrowIfInvalid(orderDetails.Buyer);
+                }
 
-            return Results.Ok(orderDetails);
+                ModelValidationException.ThrowIfInvalid(orderDetails);
+
+                await orderDataService.CreateOrderAsync(orderDetails);
+                await cartService.DeleteCartAsync(cartId);
+
+                var mailProperties = new
+                {
+                    Buyer = orderDetails.Buyer,
+                    Email = orderDetails.Buyer.Email,
+                    OrderId = orderDetails.Id,
+                    DeliveryAddress = orderDetails.Buyer.DeliveryAddress,
+                    TotalValue = orderDetails.TotalValue
+                };
+
+                try
+                {
+                    using var httpClient = new System.Net.Http.HttpClient();
+                    string functionUrl = "http://localhost:7071/api/SendOrderConfirmation";
+                    await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(httpClient, functionUrl, mailProperties);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError("Failed to trigger email function {0}", ex.Message);
+                }
+
+                return Results.Ok(orderDetails);
+            }
+            catch (ValidationException ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
         }
 
         public static async Task<IResult> UpdateOrder(Guid id, [FromBody] Order order, IOrderDataService orderDataService)
         {
             if (id != order.Id)
             {
-                return Results.BadRequest("ID in the url is not the same ID.");
+                return Results.BadRequest("ID is not the same ID.");
             }
 
             try
             {
+                ModelValidationException.ThrowIfInvalid(order);
+
                 await orderDataService.UpdateOrderAsync(order);
                 return Results.Ok($"Order {id} is updated.");
+            }
+            catch (ValidationException ex)
+            {
+                return Results.BadRequest(ex.Message);
             }
             catch (Exception)
             {
