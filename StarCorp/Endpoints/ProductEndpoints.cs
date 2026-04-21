@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using StarCorp.Abstractions;
 using StarCorp.Data;
+using StarCorp.Exceptions;
 using StarCorp.Models;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -63,10 +65,12 @@ namespace StarCorp.Endpoints
 
             try
             {
+                ModelValidationException.ThrowIfInvalid(product);
+
                 await productDataService.CreateProductAsync(product);
                 return Results.Ok(product);
             }
-            catch (ArgumentException ex)
+            catch (ValidationException ex)
             {
                 return Results.BadRequest(ex.Message);
             }
@@ -81,12 +85,14 @@ namespace StarCorp.Endpoints
 
             try
             {
+                ModelValidationException.ThrowIfInvalid(product);
+
                 await productDataService.UpdateProductAsync(product);
                 return Results.Ok(product);
             }
-            catch (ArgumentException)
+            catch (ValidationException ex)
             {
-                return Results.NotFound("Could not find the product.");
+                return Results.BadRequest(ex.Message);
             }
         }
 

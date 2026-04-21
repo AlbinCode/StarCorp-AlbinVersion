@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using StarCorp.Abstractions;
 using StarCorp.Models;
 using StarCorp.Exceptions;
+using System.ComponentModel.DataAnnotations;
 namespace StarCorp.Data
 {
     public interface IProductDataService
@@ -56,23 +57,18 @@ namespace StarCorp.Data
             _context = context;
         }
 
-        private void ValidateProduct(IProduct product)
-        {
-            ArgumentNullException.ThrowIfNull(product);
-            ArgumentNullException.ThrowIfNull(product.Id);
-        }
-
         public async Task<IProduct> CreateProductAsync(IProduct product)
         {
-            ValidateProduct(product);
+            var newProduct = (Product)product;
 
-            var exists = await _context.Products.AnyAsync(p => p.Id == product.Id);
+            var validationContext = new ValidationContext(newProduct);
+            Validator.ValidateObject(newProduct, validationContext, validateAllProperties: true);
+
+            var exists = await _context.Products.AnyAsync(p => p.Id == newProduct.Id);
             if (exists)
             {
                 throw new ArgumentException("Cannot Create new product, Product with that ID already exists");
             }
-
-            var newProduct = (Product)product;
 
             _context.Products.Add(newProduct);
             await _context.SaveChangesAsync();
@@ -87,7 +83,10 @@ namespace StarCorp.Data
 
         public async Task<IProduct> UpdateProductAsync(IProduct product)
         {
-            ValidateProduct(product);
+            var newProduct = (Product)product;
+
+            var validationContext = new ValidationContext(product);
+            Validator.ValidateObject(newProduct, validationContext, validateAllProperties: true);
 
             var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == product.Id);
 
@@ -95,8 +94,6 @@ namespace StarCorp.Data
             {
                 throw new ResourceNotFoundException(nameof(Product), product.Id);
             }
-
-            var newProduct = (Product)product;
 
             if (newProduct.Name != null)
             {
@@ -120,7 +117,6 @@ namespace StarCorp.Data
 
         public async Task DeleteProductAsync(IProduct product)
         {
-            ValidateProduct(product);
 
             var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == product.Id);
 
@@ -129,7 +125,6 @@ namespace StarCorp.Data
                 _context.Products.Remove(existingProduct);
                 await _context.SaveChangesAsync();
             }
-
         }
     }
 }

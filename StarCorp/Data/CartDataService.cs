@@ -18,7 +18,7 @@ namespace StarCorp.Data
         Task DeleteCartAsync(Guid cartId);
     }
 
-        public class CartDataService : ICartService
+    public class CartDataService : ICartService
     {
         private readonly AppDbContext _context;
         private readonly ILogger<CartDataService> _logger;
@@ -37,11 +37,10 @@ namespace StarCorp.Data
 
             if (cart == null)
             {
-                throw new ResourceNotFoundException(nameof(Cart), cart.Id);
+                throw new ResourceNotFoundException(nameof(Cart), cartId);
             }
 
             return cart;
-            
         }
         public async Task<Cart> AddProductToCartAsync(Guid cartId, LineItem item)
         {
@@ -49,7 +48,12 @@ namespace StarCorp.Data
 
             if (product == null)
             {
-                throw new ArgumentException($"Product with this ID {item.ProductId} does not exist.");
+                throw new ResourceNotFoundException(nameof(Product), item.ProductId);
+            }
+
+            if (product.Price <= 0)
+            {
+                throw new ArgumentException($"Product {product.Name} doesn't have a correct price and cannot be added to cart.");
             }
 
             var cart = await _context.Carts
@@ -67,12 +71,12 @@ namespace StarCorp.Data
             if (existingItem != null)
             {
                 existingItem.Quantity += item.Quantity;
-                existingItem.Price = item.Price;
+                existingItem.Price = product.Price;
             }
             else
             {
-
                 item.Id = item.Id == Guid.Empty ? Guid.NewGuid() : item.Id;
+                item.Price = product.Price;
                 cart.LineItems.Add(item);
             }
 
@@ -89,7 +93,7 @@ namespace StarCorp.Data
 
             if (cart == null)
             {
-                return null;
+                throw new ResourceNotFoundException(nameof(Cart), cartId);
             }
 
             var itemToRemove = cart.LineItems.FirstOrDefault(i => i.ProductId == productId);

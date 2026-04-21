@@ -11,6 +11,7 @@ namespace StarCorp.Data
         {
         }
 
+        public DbSet<Buyer> Buyer { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<LineItem> LineItems { get; set; }
         public DbSet<Product> Products { get; set; }
@@ -21,9 +22,12 @@ namespace StarCorp.Data
             base.OnModelCreating(modelBuilder);
 
             var productId1 = Guid.NewGuid();
-            var productId2 = Guid.NewGuid();
+            var buyerId1 = Guid.NewGuid();
             var orderId1 = Guid.NewGuid();
             var orderLineId1 = Guid.NewGuid();
+
+            var productId2 = Guid.NewGuid();
+            var buyerId2 = Guid.NewGuid();
             var orderId2 = Guid.NewGuid();
             var orderLineId2 = Guid.NewGuid();
 
@@ -50,21 +54,33 @@ namespace StarCorp.Data
                 }
             );
 
+            modelBuilder.Entity<Buyer>().HasData(
+                new Buyer
+                {
+                    Id = buyerId1,
+                    Name = "Albin Test",
+                    Email = "albin.test@sqli.com",
+                    DeliveryAddress = "Göteborgsvägen 123",
+                    PostalCode = 43330
+                },
+                new Buyer
+                {
+                    Id = buyerId2,
+                    Name = "Test Person 2",
+                    Email = "Test.test@sql.com",
+                    DeliveryAddress = "Kyrkogatan 26",
+                    PostalCode = 43331
+                }
+            );
             modelBuilder.Entity<Order>().HasData(
                 new Order
                 {
                     Id = orderId1,
-                    Buyer = "Albin Test",
-                    BuyerEmail = "albin.test@sqli.com",
-                    DeliveryAddress = "Göteborgsvägen 123",
                     TotalValue = 1500m
                 },
                 new Order
                 {
                     Id = orderId2,
-                    Buyer = "Test Person 2",
-                    BuyerEmail = "Test.test@sqli.com",
-                    DeliveryAddress = "Kyrkogatan 26",
                     TotalValue = 1000m
                 }
             );

@@ -3,6 +3,7 @@ using StarCorp.Abstractions;
 using StarCorp.Exceptions;
 using StarCorp.Models;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -36,7 +37,7 @@ namespace StarCorp.Data
             var newOrder = (Order)order;
 
             _context.Orders.Add(newOrder);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return newOrder.Id;
         }
@@ -52,7 +53,7 @@ namespace StarCorp.Data
             var updatedOrder = (Order)order;
 
             _context.Orders.Update(updatedOrder);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return updatedOrder.Id;
         }
