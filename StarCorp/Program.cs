@@ -19,7 +19,18 @@ namespace StarCorp
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseInMemoryDatabase("StarCorpInMemory"));
+            {
+                options.UseInMemoryDatabase("StarCorpInMemory");
+
+                if (builder.Environment.IsDevelopment())
+                {
+                    options.EnableSensitiveDataLogging();
+                }
+                else
+                {
+                    options.EnableSensitiveDataLogging(false);
+                }
+            });
 
             builder.Services.AddScoped<IProductDataService, ProductDataService>();
             builder.Services.AddScoped<IOrderDataService, OrderDataService>();
