@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using CsvHelper;
+﻿using CsvHelper;
 using Microsoft.EntityFrameworkCore;
 using StarCorp.Abstractions;
-using StarCorp.Models;
 using StarCorp.Exceptions;
+using StarCorp.Logger;
+using StarCorp.Models;
+using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 namespace StarCorp.Data
 {
     public interface IProductDataService
@@ -49,12 +46,14 @@ namespace StarCorp.Data
     public class ProductDataService : IProductDataService
     {
         private readonly AppDbContext _context;
+        private readonly IStarCorpLogger<ProductDataService> _logger;
 
 
-        public ProductDataService(AppDbContext context)
+        public ProductDataService(AppDbContext context, IStarCorpLogger<ProductDataService> logger)
         {
 
             _context = context;
+            _logger = logger;
         }
 
         public async Task<IProduct> CreateProductAsync(IProduct product)
@@ -67,11 +66,14 @@ namespace StarCorp.Data
             var exists = await _context.Products.AnyAsync(p => p.Id == newProduct.Id);
             if (exists)
             {
+                _logger.LogError("Attempted to create a product that already exists: {ProductId}", newProduct.Id);
                 throw new ArgumentException("Cannot Create new product, Product with that ID already exists");
             }
 
             _context.Products.Add(newProduct);
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation("New product {ProductId} created successfully in the catalog.", newProduct.Id);
 
             return newProduct;
         }
@@ -112,6 +114,8 @@ namespace StarCorp.Data
 
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation("Product {ProductId} updated successfully.", existingProduct.Id);
+
             return existingProduct;
         }
 
@@ -124,6 +128,8 @@ namespace StarCorp.Data
             {
                 _context.Products.Remove(existingProduct);
                 await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Product {ProductId} deleted successfully.", product.Id);
             }
         }
     }

@@ -2,16 +2,14 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Logging;
 using StarCorp.Data;
 using StarCorp.Exceptions;
+using StarCorp.Logger;
 using StarCorp.Models;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using StarCorp.Abstractions;
-using System.ComponentModel.DataAnnotations;
 
 namespace StarCorp.Endpoints
 {
@@ -26,12 +24,14 @@ namespace StarCorp.Endpoints
             group.MapPut("/{id}", UpdateOrder);
             group.MapDelete("/{id}", DeleteOrder);
         }
+
         public static async Task<IResult> GetOrders(
             [FromQuery] string? query,
             [FromQuery] int? page,
             [FromQuery] int? pagesize,
             IOrderDataService orderDataService,
-            IProductDataService productDataService)
+            IProductDataService productDataService,
+            IStarCorpLogger<OrderEndpointsLog> logger)
         {
             int currentPage = page ?? 1;
             int currentSize = pagesize ?? 20;
@@ -66,14 +66,17 @@ namespace StarCorp.Endpoints
            [FromBody] Order orderDetails,
            ICartService cartService,
            IOrderDataService orderDataService,
-           ILogger<Order> logger)
+           IStarCorpLogger<OrderEndpointsLog> logger)
         {
             var cart = await cartService.GetCartAsync(cartId);
 
             if (cart == null || !cart.LineItems.Any())
             {
+                logger.LogWarning("Checkout failed Cart {CartId} is missing or empty.", cartId);
                 return Results.BadRequest("Cart is missing or empty. Cannot create an order.");
             }
+
+            logger.LogInformation("Processing checkout for Cart {CartId}", cartId);
 
             orderDetails.Id = Guid.NewGuid();
 
@@ -111,9 +114,9 @@ namespace StarCorp.Endpoints
                 var mailProperties = new
                 {
                     Buyer = orderDetails.Buyer,
-                    Email = orderDetails.Buyer.Email,
+                    Email = orderDetails.Buyer?.Email,
                     OrderId = orderDetails.Id,
-                    DeliveryAddress = orderDetails.Buyer.DeliveryAddress,
+                    DeliveryAddress = orderDetails.Buyer?.DeliveryAddress,
                     TotalValue = orderDetails.TotalValue
                 };
 
@@ -125,23 +128,31 @@ namespace StarCorp.Endpoints
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError("Failed to trigger email function {0}", ex.Message);
+                    logger.LogError(ex, "Failed to trigger email function for Order {OrderId}", orderDetails.Id);
                 }
 
                 return Results.Ok(orderDetails);
             }
             catch (ValidationException ex)
             {
+                logger.LogWarning(ex, "Exception caught, validation did not succeed with Cart {CartId}", cartId);
                 return Results.BadRequest(ex.Message);
             }
         }
 
-        public static async Task<IResult> UpdateOrder(Guid id, [FromBody] Order order, IOrderDataService orderDataService)
+        public static async Task<IResult> UpdateOrder(
+            Guid id,
+            [FromBody] Order order,
+            IOrderDataService orderDataService,
+            IStarCorpLogger<OrderEndpointsLog> logger)
         {
             if (id != order.Id)
             {
+                logger.LogWarning("UpdateOrder failed ID {id} does not match Body ID {order.Id}.", id, order.Id);
                 return Results.BadRequest("ID is not the same ID.");
             }
+
+            logger.LogInformation("Updating Order {OrderId}", id);
 
             try
             {
@@ -152,25 +163,36 @@ namespace StarCorp.Endpoints
             }
             catch (ValidationException ex)
             {
+                logger.LogWarning(ex, "Model validation failed when updating Order {OrderId}.", id);
                 return Results.BadRequest(ex.Message);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                logger.LogWarning(ex, "Exception caught when updating Order {OrderId}. NotFound.", id);
                 throw new ResourceNotFoundException(nameof(Order), order.Id);
             }
         }
 
-        public static async Task<IResult> DeleteOrder(Guid id, IOrderDataService orderDataService)
+        public static async Task<IResult> DeleteOrder(
+            Guid id,
+            IOrderDataService orderDataService,
+            IStarCorpLogger<OrderEndpointsLog> logger)
         {
+            logger.LogInformation("Deleting Order {OrderId}", id);
+
             try
             {
                 await orderDataService.DeleteOrderAsync(id);
                 return Results.NoContent();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                logger.LogWarning(ex, "Exception caught when deleting Order {OrderId}. NotFound.", id);
                 throw new ResourceNotFoundException(nameof(Order), id);
             }
         }
     }
+
+    public record OrderEndpointsLog;
+
 }
