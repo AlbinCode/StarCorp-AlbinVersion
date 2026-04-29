@@ -11,6 +11,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace StarCorp.Endpoints
 {
+    public record CartEndpointsLog;
+
     public static class CartEndpoints
     {
         public static void MapCartEndpoints(this IEndpointRouteBuilder app)
@@ -96,6 +98,4 @@ namespace StarCorp.Endpoints
             });
         }
     }
-
-    public record CartEndpointsLog;
 }

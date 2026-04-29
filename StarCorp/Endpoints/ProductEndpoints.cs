@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 
 namespace StarCorp.Endpoints
 {
+    public record ProductEndpointsLog;
+
     public static class ProductEndpoints
     {
         public static void MapProductEndpoints(this IEndpointRouteBuilder app)
@@ -115,7 +117,4 @@ namespace StarCorp.Endpoints
             return Results.Ok();
         }
     }
-
-    public record ProductEndpointsLog;
-
 }
