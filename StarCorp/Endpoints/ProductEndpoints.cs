@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using StarCorp.Abstractions;
 using StarCorp.Data;
 using StarCorp.Exceptions;
+using StarCorp.Logger;
 using StarCorp.Models;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 
 namespace StarCorp.Endpoints
 {
+    public record ProductEndpointsLog;
+
     public static class ProductEndpoints
     {
         public static void MapProductEndpoints(this IEndpointRouteBuilder app)
@@ -29,7 +31,8 @@ namespace StarCorp.Endpoints
             [FromQuery] string? query,
             [FromQuery] int? page,
             [FromQuery] int? pageSize,
-            IProductDataService productDataService)
+            IProductDataService productDataService,
+            IStarCorpLogger<ProductEndpointsLog> logger)
         {
             int currentPage = page ?? 1;
             int currentSize = pageSize ?? 20;
@@ -56,7 +59,7 @@ namespace StarCorp.Endpoints
             return Results.Ok(result);
         }
 
-        public static async Task<IResult> CreateProduct(Product product, IProductDataService productDataService)
+        public static async Task<IResult> CreateProduct(Product product, IProductDataService productDataService, IStarCorpLogger<ProductEndpointsLog> logger)
         {
             if (product.Id == Guid.Empty)
             {
@@ -72,14 +75,16 @@ namespace StarCorp.Endpoints
             }
             catch (ValidationException ex)
             {
+                logger.LogWarning(ex, "Exception caught, Validation did not succeed with {product}", product);
                 return Results.BadRequest(ex.Message);
             }
         }
 
-        public static async Task<IResult> UpdateProduct(Guid id, Product product, IProductDataService productDataService)
+        public static async Task<IResult> UpdateProduct(Guid id, Product product, IProductDataService productDataService, IStarCorpLogger<ProductEndpointsLog> logger)
         {
             if (id != product.Id)
             {
+                logger.LogWarning("ID does not match any product inside our system");
                 return Results.BadRequest("ID does not match.");
             }
 
@@ -92,17 +97,19 @@ namespace StarCorp.Endpoints
             }
             catch (ValidationException ex)
             {
+                logger.LogWarning(ex, "Exception caught validation did not succeed with {product}", product);
                 return Results.BadRequest(ex.Message);
             }
         }
 
-        public static async Task<IResult> DeleteProduct(Guid id, IProductDataService productDataService)
+        public static async Task<IResult> DeleteProduct(Guid id, IProductDataService productDataService, IStarCorpLogger<ProductEndpointsLog> logger)
         {
             var allProducts = await productDataService.GetProductsAsync();
             var productToDelete = allProducts.FirstOrDefault(p => p.Id == id);
 
             if (productToDelete == null)
             {
+                logger.LogWarning("Delete failed: Product with ID {ProductId} was not found.", id);
                 return Results.NotFound("Product do not exist.");
             }
 

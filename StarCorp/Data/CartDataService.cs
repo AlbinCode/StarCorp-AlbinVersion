@@ -1,10 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using StarCorp.Abstractions;
 using StarCorp.Exceptions;
 using StarCorp.Models;
+using StarCorp.Logger;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,9 +19,9 @@ namespace StarCorp.Data
     public class CartDataService : ICartService
     {
         private readonly AppDbContext _context;
-        private readonly ILogger<CartDataService> _logger;
+        private readonly IStarCorpLogger<CartDataService> _logger;
 
-        public CartDataService(AppDbContext context, ILogger<CartDataService> logger)
+        public CartDataService(AppDbContext context, IStarCorpLogger<CartDataService> logger)
         {
             _context = context;
             _logger = logger;
@@ -53,6 +51,7 @@ namespace StarCorp.Data
 
             if (product.Price <= 0)
             {
+                _logger.LogError("Failed to add product to cart: Product {ProductName} has no price.", product.Name);
                 throw new ArgumentException($"Product {product.Name} doesn't have a correct price and cannot be added to cart.");
             }
 
@@ -82,6 +81,8 @@ namespace StarCorp.Data
 
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation("Product {ProductId} added to Cart {CartId}.", item.ProductId, cartId);
+
             return cart;
         }
 
@@ -104,6 +105,8 @@ namespace StarCorp.Data
                 _context.Remove(itemToRemove);
 
                 await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Removed Product {ProductId} from Cart {CartId}.", productId, cartId);
             }
 
             return cart;
@@ -116,6 +119,8 @@ namespace StarCorp.Data
             {
                 _context.Carts.Remove(cart);
                 await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Cart {CartId} was permanently removed.", cartId);
             }
         }
     }

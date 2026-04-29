@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StarCorp.Abstractions;
 using StarCorp.Exceptions;
+using StarCorp.Logger;
 using StarCorp.Models;
 using System;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,9 +23,11 @@ namespace StarCorp.Data
     public class OrderDataService : IOrderDataService
     {
         private readonly AppDbContext _context;
-        public OrderDataService(AppDbContext context)
+        private readonly IStarCorpLogger<OrderDataService> _logger;
+        public OrderDataService(AppDbContext context, IStarCorpLogger<OrderDataService> logger)
         {
             _context = context;
+            _logger = logger;
         }
         public async Task<IQueryable<IOrder>> GetOrdersAsync()
         {
@@ -38,6 +40,8 @@ namespace StarCorp.Data
 
             _context.Orders.Add(newOrder);
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation("New order {OrderId} created successfully.", newOrder.Id);
 
             return newOrder.Id;
         }
@@ -55,6 +59,8 @@ namespace StarCorp.Data
             _context.Orders.Update(updatedOrder);
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation("Order {OrderId} updated successfully.", updatedOrder.Id);
+
             return updatedOrder.Id;
         }
         public async Task<Guid> DeleteOrderAsync(Guid id)
@@ -65,6 +71,8 @@ namespace StarCorp.Data
             {
                 _context.Orders.Remove(orderToDelete);
                 await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Order {OrderId} deleted successfully.", id);
             }
 
             return id;

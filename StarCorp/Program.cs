@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using StarCorp.Data;
 using StarCorp.Endpoints;
+using StarCorp.Logger;
 using System.IO;
 using System.Reflection;
 
@@ -31,7 +32,7 @@ namespace StarCorp
                     options.EnableSensitiveDataLogging(false);
                 }
             });
-
+            builder.Services.AddTransient(typeof(IStarCorpLogger<>), typeof(StarCorpLogger<>));
             builder.Services.AddScoped<IProductDataService, ProductDataService>();
             builder.Services.AddScoped<IOrderDataService, OrderDataService>();
             builder.Services.AddScoped<ICartService, CartDataService>();
