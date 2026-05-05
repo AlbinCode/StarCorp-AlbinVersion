@@ -69,8 +69,10 @@ namespace SendGridMail
             }
             else
             {
-                var errorResponse = req.CreateResponse(HttpStatusCode.InternalServerError);
-                await errorResponse.WriteStringAsync("Failed to send email through Sendgrid.");
+                string sendGridErrorBody = await sendGridResponse.Body.ReadAsStringAsync();
+
+                var errorResponse = req.CreateResponse(sendGridResponse.StatusCode);
+                await errorResponse.WriteStringAsync($"Failed to send email through Sendgrid. {sendGridErrorBody}");
                 return errorResponse;
             }
         }

@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Quartz;
 using StarCorp.Data;
 using StarCorp.Exceptions;
+using StarCorp.Jobs;
 using StarCorp.Logger;
 using StarCorp.Models;
 using System;
@@ -64,18 +66,24 @@ namespace StarCorp.Endpoints
         }
 
         public static async Task<IResult> Checkout(
-           Guid cartId,
-           [FromBody] Order orderDetails,
-           ICartService cartService,
-           IOrderDataService orderDataService,
-           IStarCorpLogger<OrderEndpointsLog> logger)
+            Guid cartId,
+            [FromBody] Order orderDetails,
+            ICartService cartService,
+            IOrderDataService orderDataService,
+            IStarCorpLogger<OrderEndpointsLog> logger,
+            ISchedulerFactory schedulerFactory)
         {
-            var cart = await cartService.GetCartAsync(cartId);
 
-            if (cart == null || !cart.LineItems.Any())
+
+            var cart = new Cart();
+            try
+            {
+                cart = await cartService.GetCartAsync(cartId);
+            }
+            catch (Exception)
             {
                 logger.LogWarning("Checkout failed Cart {CartId} is missing or empty.", cartId);
-                return Results.BadRequest("Cart is missing or empty. Cannot create an order.");
+                return Results.NotFound("Cart is missing or empty. Cannot create an order.");
             }
 
             logger.LogInformation("Processing checkout for Cart {CartId}", cartId);
@@ -113,24 +121,29 @@ namespace StarCorp.Endpoints
                 await orderDataService.CreateOrderAsync(orderDetails);
                 await cartService.DeleteCartAsync(cartId);
 
-                var mailProperties = new
-                {
-                    Buyer = orderDetails.Buyer,
-                    Email = orderDetails.Buyer?.Email,
-                    OrderId = orderDetails.Id,
-                    DeliveryAddress = orderDetails.Buyer?.DeliveryAddress,
-                    TotalValue = orderDetails.TotalValue
-                };
-
                 try
                 {
-                    using var httpClient = new System.Net.Http.HttpClient();
-                    string functionUrl = "http://localhost:7071/api/SendOrderConfirmation";
-                    await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(httpClient, functionUrl, mailProperties);
+                    var scheduler = await schedulerFactory.GetScheduler();
+
+                    var job = JobBuilder.Create<SendEmailJob>()
+                        .WithIdentity($"emailJob-{orderDetails.Id}", "emailGroup")
+                        .UsingJobData("BuyerName", orderDetails.Buyer.Name)
+                        .UsingJobData("BuyerEmail", orderDetails.Buyer.Email)
+                        .UsingJobData("DeliveryAddress", orderDetails.Buyer.DeliveryAddress)
+                        .UsingJobData("OrderId", orderDetails.Id.ToString())
+                        .UsingJobData("TotalValue", orderDetails.TotalValue.ToString())
+                        .Build();
+
+                    var trigger = TriggerBuilder.Create()
+                        .WithIdentity($"emailTrigger-{orderDetails.Id}", "emailGroup")
+                        .StartNow()
+                        .Build();
+
+                    await scheduler.ScheduleJob(job, trigger);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Failed to trigger email function for Order {OrderId}", orderDetails.Id);
+                    logger.LogError(ex, "Failed to schedule email job for Order {OrderId}", orderDetails.Id);
                 }
 
                 return Results.Ok(orderDetails);
